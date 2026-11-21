@@ -1,5 +1,7 @@
 import { getStore } from "@netlify/blobs";
-import { esc } from "./_lib.mjs";
+import { esc, buildIntentLink, buildOnelink } from "./_lib.mjs";
+
+const j = (v) => JSON.stringify(v).replace(/</g, "\\u003c");
 import { HARDCODED } from "./hardcoded.mjs";
 
 const html = (body, status = 200) =>
@@ -37,15 +39,20 @@ ${rec.image ? `<img src="${esc(rec.image)}" alt="">` : ""}
 </div>
 <script>
 (function(){
-  var app=${JSON.stringify(rec.appLink).replace(/</g, "\\u003c")}, web=${JSON.stringify(rec.webUrl).replace(/</g, "\\u003c")};
-  var mobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  if(!mobile){ location.replace(web); return; }
+  var app=${j(rec.appLink)}, web=${j(rec.webUrl)}, intent=${j(buildIntentLink(rec.appLink, rec.webUrl))}, onelink=${j(buildOnelink(rec.appLink))};
+  var ua=navigator.userAgent;
+  var android=/Android/i.test(ua), ios=/iPhone|iPad|iPod/i.test(ua);
+  if(!android && !ios){ location.replace(web); return; }
   var left=false;
   document.addEventListener('visibilitychange',function(){ if(document.hidden) left=true; });
   window.addEventListener('pagehide',function(){ left=true; });
   window.addEventListener('blur',function(){ left=true; });
-  location.replace(app);
-  setTimeout(function(){ if(!left && !document.hidden){ location.replace(web); } },2000);
+  location.replace(android ? intent : onelink);
+  setTimeout(function(){
+    if(left || document.hidden) return;
+    document.getElementById('s').textContent='Chưa mở được app. Nếu đang dùng Zalo/Facebook, hãy mở link bằng Chrome/Safari.';
+    setTimeout(function(){ location.replace(web); },2500);
+  },2500);
 })();
 </script></body></html>`);
 };

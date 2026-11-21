@@ -45,7 +45,9 @@ export function parseProduct(webUrl) {
 export function buildAppLink(webUrl, productId) {
   const q = new URLSearchParams({
     biz_type: "0",
+    gd_label: "click_wap_p_product_detail_t_launch_pop_up_s_product_detail_e__f_product_detail_fp__fps_affiliate_links_rf_product_detail",
     need_mall: "1",
+    needlaunchlog: "1",
     page_name: "reflow_pdp",
     params_url: webUrl,
     requestParams: JSON.stringify({ product_id: [productId] }),
@@ -53,6 +55,24 @@ export function buildAppLink(webUrl, productId) {
     refer: "web",
   });
   return "snssdk1180://ec/pdp?" + q.toString();
+}
+
+// Android Chrome: intent:// được phép tự chạy khi điều hướng, kèm fallback về web nếu chưa cài app.
+export function buildIntentLink(appLink, webUrl) {
+  const rest = appLink.replace(/^snssdk1180:\/\//, "");
+  return (
+    "intent://" + rest +
+    "#Intent;scheme=snssdk1180;package=com.ss.android.ugc.trill;S.browser_fallback_url=" +
+    encodeURIComponent(webUrl) + ";end"
+  );
+}
+
+// iOS: universal link của TikTok (onelink) thay cho scheme tuỳ biến vốn bị Safari chặn khi tự chạy.
+export function buildOnelink(appLink) {
+  return (
+    "https://snssdk1180.onelink.me/BAuo?domain_source=tiktok&af_dp=" + encodeURIComponent(appLink) +
+    "&af_force_deeplink=true&refer=web&action=openapp"
+  );
 }
 
 export function newCode() {
