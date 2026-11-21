@@ -47,7 +47,7 @@ ${rec.image ? `<img src="${esc(rec.image)}" alt="">` : ""}
   document.addEventListener('visibilitychange',function(){ if(document.hidden) left=true; });
   window.addEventListener('pagehide',function(){ left=true; });
   window.addEventListener('blur',function(){ left=true; });
-  location.replace(android ? intent : onelink);
+  location.replace(android ? intent : app);
   setTimeout(function(){
     if(left || document.hidden) return;
     document.getElementById('s').textContent='Chưa mở được app. Nếu đang dùng Zalo/Facebook, hãy mở link bằng Chrome/Safari.';
