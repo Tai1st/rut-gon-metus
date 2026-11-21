@@ -1,0 +1,5 @@
+# Chạy Next.js thật (SSR, route handler /api/*) thay vì phục vụ thư mục public/ như site tĩnh.
+# File này ghi đè cấu hình Build settings trên giao diện Netlify (publish = "public").
+[build]
+  command = "npm run build"
+  publish = ".next"
