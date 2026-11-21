@@ -27,7 +27,16 @@ certbot --nginx -d link.metus.vn --redirect
 
 DNS: bản ghi `link.metus.vn` trỏ về VPS (đang qua Cloudflare, giống `api-v3.metus.vn`).
 
-## Cập nhật
+## Tự động deploy (GitHub Actions)
+
+Mỗi lần push `main`, workflow `.github/workflows/deploy.yml` build thử, rồi SSH vào VPS: `git pull`, `npm ci`, build,
+`pm2 reload`, kiểm tra `http://127.0.0.1:3003/login`; build hoặc kiểm tra lỗi thì tự quay về bản `.next` trước đó.
+
+Cần đặt 4 secrets trong repo (Settings → Secrets and variables → Actions), cùng giá trị với repo backend:
+`VPS_HOST`, `VPS_PORT`, `VPS_USER`, `VPS_SSH_KEY` (khóa riêng SSH, định dạng PEM/OpenSSH, khóa công khai tương ứng
+phải nằm trong `~/.ssh/authorized_keys` của user trên VPS).
+
+## Cập nhật thủ công
 
 ```bash
 cd /var/www/metus-link
