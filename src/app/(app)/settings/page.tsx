@@ -192,7 +192,7 @@ export default function SettingsPage() {
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <span className="text-2xl font-extrabold">{q.plan.name}</span>
-                  <Badge tone="green">Đang hoạt động</Badge>
+                  <Badge tone={q.disabled ? "red" : "green"}>{q.disabled ? "Đã tắt" : "Đang hoạt động"}</Badge>
                 </div>
                 {data?.plan?.description && <p className="text-xs text-zinc-400">{data.plan.description}</p>}
               </div>
@@ -219,7 +219,14 @@ export default function SettingsPage() {
                   style={{ width: `${pct}%` }}
                 />
               </div>
-              {nearLimit && <p className="text-[11px] text-red-400">Sắp hết hạn mức, bạn có thể nâng cấp để tạo thêm link.</p>}
+              {q.disabled && (
+                <p className="text-[11px] text-red-400">
+                  Gói miễn phí hiện đã tắt, bạn cần mua gói để tạo link mới. Các link đã tạo vẫn hoạt động.
+                </p>
+              )}
+              {!q.disabled && nearLimit && (
+                <p className="text-[11px] text-red-400">Sắp hết hạn mức, bạn có thể nâng cấp để tạo thêm link.</p>
+              )}
             </div>
 
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">

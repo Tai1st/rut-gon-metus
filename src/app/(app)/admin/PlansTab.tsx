@@ -106,7 +106,11 @@ export function PlansTab() {
   }
 
   async function deactivate(p: Plan) {
-    if (!confirm(`Ngừng bán gói ${p.name}? Người đang dùng vẫn giữ gói đến khi hết hạn.`)) return;
+    const msg =
+      p.code === "free"
+        ? "Tắt gói miễn phí? Người chưa mua gói sẽ KHÔNG tạo được link mới (link đã tạo vẫn hoạt động). Bật lại bằng nút Sửa, tick Đang bán."
+        : `Ngừng bán gói ${p.name}? Người đang dùng vẫn giữ gói đến khi hết hạn.`;
+    if (!confirm(msg)) return;
     try {
       await api(`link-plans/${p.code}`, { method: "DELETE" });
       await load();
@@ -228,14 +232,14 @@ export function PlansTab() {
                   {p.systemDomains.length ? `domain: ${p.systemDomains.join(", ")}` : "mọi domain hệ thống"}
                 </p>
                 <p className="text-xs text-slate-500">
-                  {p.prices.length ? p.prices.map((x) => `${x.months}th ${vnd(x.price)}`).join(" · ") : "Không bán (gói miễn phí)"}
+                  {p.code === "free" ? "Gói miễn phí (không bán)" : p.prices.length ? p.prices.map((x) => `${x.months}th ${vnd(x.price)}`).join(" · ") : "Không bán (cấp thủ công)"}
                 </p>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
                 <button className={btnGhost} onClick={() => edit(p)}>
                   Sửa
                 </button>
-                {p.code !== "free" && p.isActive && (
+                {p.isActive && (
                   <button className={btnDanger} onClick={() => deactivate(p)}>
                     Ngừng bán
                   </button>

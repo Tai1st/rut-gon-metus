@@ -1,19 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { Suspense, createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   Archive,
   BarChart2,
   CalendarX,
   ChevronDown,
+  CreditCard,
   Crown,
   FolderKanban,
   GitFork,
   Layers,
   Link as LinkIcon,
   Link2,
+  LogOut,
   Menu,
   Smartphone,
   QrCode,
@@ -89,8 +91,12 @@ function PlanCard({ quota }: { quota: Quota | null }) {
           <div className="bg-gradient-to-r from-tiktok-cyan to-tiktok-pink h-full" style={{ width: `${pct}%` }} />
         </div>
         <div className="text-[10px] text-zinc-500 flex justify-between gap-2">
-          <span>
-            {unlimited ? "Không giới hạn link" : `Đã dùng ${quota.used}/${quota.limit} link/${PERIOD_VI[quota.period]}`}
+          <span className={quota.disabled ? "text-red-400" : ""}>
+            {quota.disabled
+              ? "Gói miễn phí đã tắt"
+              : unlimited
+                ? "Không giới hạn link"
+                : `Đã dùng ${quota.used}/${quota.limit} link/${PERIOD_VI[quota.period]}`}
           </span>
           <Link href="/plans" className="text-tiktok-cyan hover:underline shrink-0">
             Nâng cấp
@@ -250,6 +256,94 @@ function BottomNav({ onCreate }: { onCreate: () => void }) {
   );
 }
 
+/** Nút hồ sơ ở thanh trên: avatar + tên + mũi tên; bấm mở menu tài khoản (giống bản mẫu, thêm Đăng xuất). */
+function ProfileMenu({ me, display, plan, onLogout }: { me: Me; display: string; plan?: string; onLogout: () => void }) {
+  const [open, setOpen] = useState(false);
+  const path = usePathname();
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Đóng khi bấm ra ngoài, nhấn Esc, hoặc chuyển trang.
+  useEffect(() => setOpen(false), [path]);
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  const row = "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-zinc-300 hover:text-white hover:bg-white/5 transition-colors";
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        className="flex items-center gap-2 pl-1.5 pr-2.5 py-1 rounded-xl hover:bg-zinc-800/80 transition-colors"
+      >
+        <div className="w-8 h-8 rounded-lg bg-emerald-400/20 border border-emerald-400/40 flex items-center justify-center overflow-hidden">
+          <svg viewBox="0 0 36 36" className="w-full h-full">
+            <rect width="36" height="36" fill="#6ee7b7" />
+            <polygon points="18,4 32,18 18,32 4,18" fill="#a7f3d0" />
+            <circle cx="18" cy="18" r="6" fill="#34d399" />
+          </svg>
+        </div>
+        <span className="text-xs sm:text-sm font-semibold text-zinc-200 max-w-[110px] truncate">{display}</span>
+        <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+
+      {open && (
+        <div
+          role="menu"
+          className="absolute right-0 mt-2 w-64 bg-[#16161C] border border-zinc-800 rounded-2xl shadow-2xl shadow-black/50 p-2 z-50"
+        >
+          <div className="px-3 py-2.5 border-b border-zinc-800 mb-1 space-y-1">
+            <div className="text-sm font-bold text-white truncate">{display}</div>
+            <div className="text-[11px] font-mono text-zinc-500 truncate">@{me.username}</div>
+            <div className="flex items-center gap-1.5 pt-1">
+              {me.role === "admin" && (
+                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-tiktok-cyan/15 text-tiktok-cyan">Admin</span>
+              )}
+              {plan && (
+                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-tiktok-pink/15 text-tiktok-pink uppercase">
+                  Gói {plan}
+                </span>
+              )}
+            </div>
+          </div>
+          <Link href="/settings" role="menuitem" className={row}>
+            <Settings className="w-4 h-4" />
+            <span>Cài đặt tài khoản</span>
+          </Link>
+          <Link href="/plans" role="menuitem" className={row}>
+            <CreditCard className="w-4 h-4" />
+            <span>Gói & thanh toán</span>
+          </Link>
+          {me.role === "admin" && (
+            <Link href="/admin" role="menuitem" className={row}>
+              <ShieldCheck className="w-4 h-4" />
+              <span>Quản trị</span>
+            </Link>
+          )}
+          <div className="border-t border-zinc-800 mt-1 pt-1">
+            <button onClick={onLogout} role="menuitem" className={`${row} hover:text-tiktok-pink`}>
+              <LogOut className="w-4 h-4" />
+              <span>Đăng xuất</span>
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function AppShell({ me, quota, counts, children }: { me: Me; quota: Quota | null; counts: Counts; children: ReactNode }) {
   const router = useRouter();
   const [drawer, setDrawer] = useState(false);
@@ -341,22 +435,7 @@ export function AppShell({ me, quota, counts, children }: { me: Me; quota: Quota
                 <span>Nâng cấp</span>
               </Link>
 
-              <div className="flex items-center gap-2 pl-1.5 pr-2.5 py-1 rounded-xl">
-                <div className="w-8 h-8 rounded-lg bg-emerald-400/20 border border-emerald-400/40 flex items-center justify-center overflow-hidden">
-                  <svg viewBox="0 0 36 36" className="w-full h-full">
-                    <rect width="36" height="36" fill="#6ee7b7" />
-                    <polygon points="18,4 32,18 18,32 4,18" fill="#a7f3d0" />
-                    <circle cx="18" cy="18" r="6" fill="#34d399" />
-                  </svg>
-                </div>
-                <span className="text-xs sm:text-sm font-semibold text-zinc-200 max-w-[110px] truncate">{display}</span>
-                {me.role === "admin" && (
-                  <span className="hidden sm:inline text-[10px] font-semibold px-1.5 py-0.5 rounded bg-tiktok-cyan/15 text-tiktok-cyan">Admin</span>
-                )}
-              </div>
-              <button onClick={logout} className="text-xs font-semibold text-zinc-400 hover:text-tiktok-pink transition-colors">
-                Đăng xuất
-              </button>
+              <ProfileMenu me={me} display={display} plan={quota?.plan.name} onLogout={logout} />
             </div>
           </header>
 

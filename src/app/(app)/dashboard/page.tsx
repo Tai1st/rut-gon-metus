@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api, copyText, fmtDate } from "@/lib/api";
 import { useMe } from "@/components/AppShell";
@@ -186,7 +187,15 @@ export default function DashboardPage() {
           label="Còn lại hôm nay"
           value={quota ? (unlimited ? "∞" : String(quota.remaining)) : "—"}
           valueCls={exhausted ? "text-red-400" : "text-emerald-400"}
-          note={quota ? (unlimited ? "Không giới hạn" : `Trên ${quota.limit} link/${PERIOD_VI[quota.period]}`) : "Đang tải…"}
+          note={
+            quota
+              ? quota.disabled
+                ? "Gói miễn phí đã tắt"
+                : unlimited
+                  ? "Không giới hạn"
+                  : `Trên ${quota.limit} link/${PERIOD_VI[quota.period]}`
+              : "Đang tải…"
+          }
           noteCls={exhausted ? "text-red-400" : "text-zinc-500"}
           dot="bg-emerald-400"
         />
@@ -249,7 +258,24 @@ export default function DashboardPage() {
         </form>
         <div className="mt-3 space-y-2">
           <ErrorBox message={error} />
-          {exhausted && <p className="text-xs text-red-400">Đã hết hạn mức, hãy nâng cấp gói ở mục “Gói & thanh toán”.</p>}
+          {quota?.disabled ? (
+            <p className="text-xs text-red-400">
+              Gói miễn phí hiện đã tắt, bạn cần mua gói để tạo link mới.{" "}
+              <Link href="/plans" className="underline font-semibold">
+                Xem các gói
+              </Link>
+            </p>
+          ) : (
+            exhausted && (
+              <p className="text-xs text-red-400">
+                Đã hết hạn mức, hãy{" "}
+                <Link href="/plans" className="underline font-semibold">
+                  nâng cấp gói
+                </Link>
+                .
+              </p>
+            )
+          )}
         </div>
       </div>
 

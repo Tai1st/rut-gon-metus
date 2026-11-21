@@ -30,6 +30,8 @@ export type Quota = {
   limit: number | null;
   used: number;
   remaining: number | null;
+  /** Gói free đã bị admin tắt và người dùng chưa có gói trả phí còn hạn: không tạo được link mới. */
+  disabled?: boolean;
 };
 
 export type PricePoint = { months: number; price: number };
