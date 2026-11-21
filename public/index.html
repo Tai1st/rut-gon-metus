@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rút gọn link TikTok Shop</title>
+<style>
+body{font-family:system-ui,sans-serif;max-width:520px;margin:40px auto;padding:0 16px}
+input,button{width:100%;padding:10px;margin:6px 0;font-size:15px;box-sizing:border-box}
+button{background:#fe2c55;color:#fff;border:0;border-radius:8px;cursor:pointer}
+#o{word-break:break-all;margin-top:12px}
+</style>
+</head>
+<body>
+<h2>Rút gọn link TikTok Shop</h2>
+<input id="u" placeholder="https://vt.tiktok.com/... hoặc https://www.tiktok.com/view/product/...">
+<input id="t" placeholder="Tiêu đề (tuỳ chọn, mặc định lấy tên sản phẩm)">
+<input id="k" type="password" placeholder="ADMIN_KEY (nếu đã đặt)">
+<button id="b">Tạo link</button>
+<div id="o"></div>
+<script>
+document.getElementById('b').onclick = async () => {
+  const o = document.getElementById('o');
+  o.textContent = '...';
+  const r = await fetch('/api/create', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-admin-key': document.getElementById('k').value },
+    body: JSON.stringify({ url: document.getElementById('u').value, title: document.getElementById('t').value })
+  });
+  const d = await r.json();
+  if (!r.ok) { o.textContent = 'Lỗi: ' + d.error; return; }
+  o.textContent = '';
+  const a = document.createElement('a');
+  a.href = d.short; a.textContent = d.short;
+  o.append(d.title + ' → ', a);
+};
+</script>
+</body>
+</html>
