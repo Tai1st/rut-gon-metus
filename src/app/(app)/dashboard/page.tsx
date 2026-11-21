@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { api, copyText, fmtDate } from "@/lib/api";
 import { useMe } from "@/components/AppShell";
 import { QrModal } from "@/components/QrModal";
@@ -47,7 +47,9 @@ export default function DashboardPage() {
   const [domains, setDomains] = useState<Available>({ system: [], custom: [] });
   const [links, setLinks] = useState<LinkItem[]>([]);
   const [archived, setArchived] = useState<LinkItem[]>([]);
-  const [tab, setTab] = useState<Tab>("active");
+  // Tab nằm trên URL (?tab=active|archived) để thanh bên và trang luôn khớp nhau.
+  const tab: Tab = useSearchParams().get("tab") === "archived" ? "archived" : "active";
+  const setTab = (t: Tab) => router.replace(`/dashboard?tab=${t}`, { scroll: false });
   const [search, setSearch] = useState("");
   const [kind, setKind] = useState("");
   const [url, setUrl] = useState("");
@@ -252,7 +254,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Danh sách link: tab, tìm kiếm, lọc */}
-      <div className={`${cardCls} p-5 sm:p-6 space-y-4`}>
+      <div id="danh-sach" className={`${cardCls} p-5 sm:p-6 space-y-4 scroll-mt-24`}>
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
           <div className="flex items-center gap-1 bg-black/40 p-1 rounded-xl border border-zinc-800 w-fit">
             {(
