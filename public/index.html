@@ -32,7 +32,20 @@ document.getElementById('b').onclick = async () => {
   o.textContent = '';
   const a = document.createElement('a');
   a.href = d.short; a.textContent = d.short;
-  o.append(d.title + ' → ', a);
+  const cp = document.createElement('button');
+  cp.textContent = 'Sao chép link';
+  cp.onclick = async () => {
+    try {
+      await navigator.clipboard.writeText(d.short);
+    } catch (e) {
+      const ta = document.createElement('textarea');
+      ta.value = d.short; document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); ta.remove();
+    }
+    cp.textContent = 'Đã sao chép ✓';
+    setTimeout(() => { cp.textContent = 'Sao chép link'; }, 1500);
+  };
+  o.append(d.title + ' → ', a, cp);
 };
 </script>
 </body>
