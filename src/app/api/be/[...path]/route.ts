@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
-import { beFetch } from "@/lib/be";
+import { beFetch, clientIp } from "@/lib/be";
 import { SESSION_COOKIE } from "@/lib/config";
 
 /**
@@ -27,6 +27,7 @@ async function forward(req: NextRequest, ctx: Ctx) {
     method: req.method,
     body: body || undefined,
     token,
+    ip: clientIp(req.headers),
   }).catch(() => null);
   if (!res) return NextResponse.json({ message: "Không kết nối được máy chủ" }, { status: 502 });
 

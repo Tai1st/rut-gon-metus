@@ -8,5 +8,5 @@ export async function POST(req: Request) {
     username: body.username ?? "",
     password: body.password ?? "",
     ...(body.fullName?.trim() && { fullName: body.fullName.trim() }),
-  });
+  }, req);
 }

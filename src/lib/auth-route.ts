@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { beFetch } from "./be";
+import { beFetch, clientIp } from "./be";
 import { SESSION_COOKIE, SESSION_MAX_AGE } from "./config";
 
 type BeSession = {
@@ -12,8 +12,12 @@ type BeSession = {
  * Gọi route đăng nhập/đăng ký của backend (/link-auth/*), nhận JWT rồi đặt vào cookie httpOnly.
  * Trình duyệt chỉ nhận thông tin người dùng, không bao giờ thấy token.
  */
-export async function authViaBackend(path: "/link-auth/login" | "/link-auth/register", payload: unknown) {
-  const res = await beFetch(path, { method: "POST", body: JSON.stringify(payload) }).catch(() => null);
+export async function authViaBackend(path: "/link-auth/login" | "/link-auth/register", payload: unknown, req: Request) {
+  const res = await beFetch(path, {
+    method: "POST",
+    body: JSON.stringify(payload),
+    ip: clientIp(req.headers),
+  }).catch(() => null);
   if (!res) return NextResponse.json({ message: "Không kết nối được máy chủ" }, { status: 502 });
 
   const data = (await res.json().catch(() => ({}))) as BeSession;

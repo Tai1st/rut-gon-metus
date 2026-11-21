@@ -7,5 +7,5 @@ export async function POST(req: Request) {
   return authViaBackend("/link-auth/login", {
     username: body.username ?? "",
     password: body.password ?? "",
-  });
+  }, req);
 }
