@@ -28,6 +28,41 @@ export async function resolveShort(u) {
   return cur;
 }
 
+// Link chiến dịch/khuyến mãi: https://www.tiktok.com/caravel/campaign?campaign_id=...
+export function parseCampaign(webUrl) {
+  const x = new URL(webUrl);
+  if (!/^\/caravel\/campaign\/?$/.test(x.pathname)) return null;
+  const campaignId = x.searchParams.get("campaign_id");
+  return campaignId ? { campaignId } : null;
+}
+
+// Deeplink của TikTok cho trang chiến dịch: mở webview trong app tới oec-api.tiktokv.com với cùng tham số.
+export function buildCampaignAppLink(webUrl) {
+  const q = new URLSearchParams(new URL(webUrl).search);
+  q.set("caravel_open_app", "facebook");
+  q.set("caravel_open_method", "deeplink");
+  const inner = "https://oec-api.tiktokv.com/caravel/campaign?" + q.toString();
+  return "snssdk1180://webview?" + new URLSearchParams({ url: inner }).toString();
+}
+
+// Lấy ảnh (và mô tả) xem trước từ chính trang tiktok.com (host đã được kiểm tra là tiktok.com).
+export async function fetchPreview(webUrl) {
+  try {
+    const r = await fetch(webUrl, {
+      headers: { "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 Mobile/21F90" },
+      signal: AbortSignal.timeout(8000),
+    });
+    const h = await r.text();
+    const og = (p) => {
+      const m = h.match(new RegExp(`<meta[^>]+property="${p}"[^>]*content="([^"]*)"`));
+      return m ? m[1].replace(/&amp;/g, "&") : "";
+    };
+    return { title: og("og:title"), image: og("og:image") };
+  } catch {
+    return { title: "", image: "" };
+  }
+}
+
 export function parseProduct(webUrl) {
   const x = new URL(webUrl);
   const m = x.pathname.match(/\/view\/product\/(\d+)/);

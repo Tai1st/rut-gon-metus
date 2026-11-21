@@ -1,5 +1,8 @@
 import { getStore } from "@netlify/blobs";
-import { isTikTokUrl, resolveShort, parseProduct, buildAppLink, newCode } from "./_lib.mjs";
+import {
+  isTikTokUrl, resolveShort, parseProduct, buildAppLink,
+  parseCampaign, buildCampaignAppLink, fetchPreview, newCode,
+} from "./_lib.mjs";
 
 const json = (o, status = 200) =>
   new Response(JSON.stringify(o), { status, headers: { "content-type": "application/json; charset=utf-8" } });
@@ -27,22 +30,36 @@ export default async (req) => {
   }
   if (!isTikTokUrl(webUrl)) return json({ error: "Đích không thuộc TikTok" }, 400);
 
+  const customTitle = String(body.title || "").trim().slice(0, 200);
+  let rec;
   const p = parseProduct(webUrl);
-  if (!p) return json({ error: "Không phải link sản phẩm TikTok Shop (/view/product/…)" }, 400);
-
-  const title = String(body.title || "").trim().slice(0, 200) || p.title || "Sản phẩm TikTok Shop";
-  const rec = {
-    webUrl,
-    appLink: buildAppLink(webUrl, p.productId),
-    productId: p.productId,
-    title,
-    image: p.image,
-    createdAt: Date.now(),
-  };
+  if (p) {
+    rec = {
+      kind: "product",
+      webUrl,
+      appLink: buildAppLink(webUrl, p.productId),
+      productId: p.productId,
+      title: customTitle || p.title || "Sản phẩm TikTok Shop",
+      image: p.image,
+    };
+  } else {
+    const c = parseCampaign(webUrl);
+    if (!c) return json({ error: "Chỉ hỗ trợ link sản phẩm (/view/product/…) hoặc chiến dịch (/caravel/campaign…)" }, 400);
+    const pv = await fetchPreview(webUrl);
+    rec = {
+      kind: "campaign",
+      webUrl,
+      appLink: buildCampaignAppLink(webUrl),
+      campaignId: c.campaignId,
+      title: customTitle || "Ưu đãi trên TikTok Shop",
+      image: pv.image,
+    };
+  }
+  rec.createdAt = Date.now();
 
   const code = newCode();
   await getStore("links").setJSON(code, rec);
 
   const origin = new URL(req.url).origin;
-  return json({ code, short: `${origin}/s/${code}`, title, productId: p.productId });
+  return json({ code, kind: rec.kind, short: `${origin}/s/${code}`, title: rec.title });
 };
