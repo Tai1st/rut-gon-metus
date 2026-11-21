@@ -99,3 +99,9 @@ details > summary::-webkit-details-marker {
 details[open] .faq-plus {
   transform: rotate(45deg);
 }
+
+/* Nền chấm bi tinh tế cho khu vực quản lý */
+.bg-plus-pattern {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 24px 24px;
+}

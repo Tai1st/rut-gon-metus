@@ -10,6 +10,18 @@ export type LinkItem = {
   domain: string;
   clicks: number;
   createdAt: string;
+  archivedAt: string | null;
+};
+
+export type InspectResult = {
+  kind: "product" | "campaign";
+  webUrl: string;
+  androidUrl: string;
+  iosUrl: string;
+  title: string;
+  image: string;
+  productId: string;
+  campaignId: string;
 };
 
 export type Quota = {

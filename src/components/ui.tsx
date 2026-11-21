@@ -5,13 +5,13 @@ import type { ReactNode } from "react";
 /** Thành phần giao diện dùng chung theo style tham chiếu: nền tối, thẻ kính mờ, nhấn hồng/cyan. */
 
 export const inputCls =
-  "w-full bg-black/60 border border-tiktok-border focus:border-tiktok-cyan rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-gray-500 outline-none transition-all disabled:opacity-50";
+  "w-full bg-zinc-900 border border-zinc-700 focus:border-tiktok-cyan rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-zinc-500 outline-none transition-all disabled:opacity-50";
 
 export const btnPrimary =
   "tiktok-glow-btn text-white font-bold py-2.5 px-5 rounded-xl text-sm inline-flex items-center justify-center gap-2";
 
 export const btnGhost =
-  "px-3 py-1.5 text-xs font-medium rounded-lg border border-tiktok-border bg-tiktok-card text-gray-300 hover:border-tiktok-cyan transition-colors disabled:opacity-40";
+  "px-3 py-1.5 text-xs font-semibold rounded-lg bg-zinc-800 text-zinc-200 hover:bg-tiktok-cyan hover:text-black transition-colors disabled:opacity-40";
 
 export const btnDanger = "text-xs text-red-400 hover:text-red-300 transition-colors disabled:opacity-40";
 
@@ -27,35 +27,34 @@ export function Ambient() {
 
 export function Card({ title, right, children }: { title?: string; right?: ReactNode; children: ReactNode }) {
   return (
-    <div className="bg-tiktok-surface border border-tiktok-border rounded-3xl shadow-2xl relative overflow-hidden">
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-tiktok-cyan via-tiktok-pink to-tiktok-cyan" />
+    <div className="bg-[#141419] border border-zinc-800 rounded-2xl p-5 sm:p-6 space-y-4">
       {title && (
-        <div className="px-5 sm:px-6 pt-6 pb-3 flex items-center justify-between gap-3 flex-wrap">
-          <h2 className="text-base sm:text-lg font-extrabold text-white">{title}</h2>
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <h2 className="text-base font-bold text-white">{title}</h2>
           {right}
         </div>
       )}
-      <div className={`px-5 sm:px-6 pb-6 ${title ? "" : "pt-6"}`}>{children}</div>
+      <div>{children}</div>
     </div>
   );
 }
 
 export function Label({ children }: { children: ReactNode }) {
-  return <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">{children}</label>;
+  return <label className="block text-xs font-medium text-zinc-400 mb-1.5">{children}</label>;
 }
 
 const BADGE = {
-  green: "text-emerald-400 bg-emerald-500/15 border-emerald-500/30",
-  blue: "text-tiktok-cyan bg-tiktok-cyan/10 border-tiktok-cyan/30",
-  amber: "text-amber-300 bg-amber-500/15 border-amber-500/30",
-  gray: "text-slate-400 bg-white/5 border-tiktok-border",
-  red: "text-red-400 bg-red-500/15 border-red-500/30",
-  pink: "text-tiktok-pink bg-tiktok-pink/10 border-tiktok-pink/30",
+  green: "text-emerald-400 bg-emerald-500/15",
+  blue: "text-tiktok-cyan bg-tiktok-cyan/15",
+  amber: "text-amber-300 bg-amber-500/15",
+  gray: "text-zinc-400 bg-zinc-800",
+  red: "text-red-400 bg-red-500/15",
+  pink: "text-tiktok-pink bg-tiktok-pink/15",
 } as const;
 
 export function Badge({ tone = "gray", children }: { tone?: keyof typeof BADGE; children: ReactNode }) {
   return (
-    <span className={`inline-flex items-center text-[11px] font-bold border rounded-md px-2 py-0.5 ${BADGE[tone]}`}>
+    <span className={`inline-flex items-center text-[10px] font-semibold rounded px-2 py-0.5 ${BADGE[tone]}`}>
       {children}
     </span>
   );
@@ -70,11 +69,10 @@ export function Modal({ title, onClose, children }: { title: string; onClose: ()
   return (
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose}>
       <div
-        className="bg-tiktok-surface border border-tiktok-border rounded-3xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-auto relative"
+        className="bg-[#141419] border border-zinc-800 rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-auto relative"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-tiktok-cyan via-tiktok-pink to-tiktok-cyan" />
-        <div className="px-5 pt-6 pb-3 flex items-center justify-between">
+        <div className="px-5 pt-5 pb-3 flex items-center justify-between">
           <h3 className="text-base font-extrabold text-white">{title}</h3>
           <button onClick={onClose} className="text-slate-500 hover:text-white text-xl leading-none">
             ×

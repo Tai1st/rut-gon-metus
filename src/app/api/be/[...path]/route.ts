@@ -8,7 +8,7 @@ import { SESSION_COOKIE } from "@/lib/config";
  * và chỉ cho đi tới các nhóm route của tính năng này.
  */
 const ALLOWED = ["links", "link-plans", "link-orders", "link-domains"];
-const ALLOWED_AUTH = new Set(["me"]);
+const ALLOWED_AUTH = new Set(["me", "change-password"]);
 
 type Ctx = { params: Promise<{ path: string[] }> };
 
