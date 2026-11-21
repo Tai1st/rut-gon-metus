@@ -33,8 +33,7 @@ export default async (req) => {
     meta("al:android:url", rec.appLink),
     meta("al:android:package", "com.ss.android.ugc.trill"),
     meta("al:android:app_name", "TikTok"),
-    // Trang chiến dịch: TikTok khai báo cùng deeplink cho iOS; trang sản phẩm dùng onelink.
-    meta("al:ios:url", rec.kind === "campaign" ? rec.appLink : buildOnelink(rec.appLink)),
+    meta("al:ios:url", buildOnelink(rec.appLink)),
     meta("al:ios:app_store_id", "1235601864"),
     meta("al:ios:app_name", "TikTok"),
     meta("al:web:should_fallback", "true"),
