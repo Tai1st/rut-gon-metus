@@ -43,7 +43,7 @@ export function OrdersTab() {
       title="Đơn mua gói"
       right={
         <select
-          className="text-xs border border-gray-200 rounded-md px-2 py-1 bg-white"
+          className="text-xs border border-tiktok-border rounded-md px-2 py-1 bg-tiktok-card"
           value={status}
           onChange={(e) => setStatus(e.target.value)}
         >
@@ -55,27 +55,27 @@ export function OrdersTab() {
       }
     >
       <ErrorBox message={error} />
-      <p className="text-[11px] text-gray-400 mb-2">
+      <p className="text-[11px] text-slate-500 mb-2">
         Đơn tự xác nhận khi tiền về đúng số tiền và nội dung. Chỉ bấm “Đã nhận tiền” khi bạn đã kiểm tra giao dịch.
       </p>
       {orders.length === 0 ? (
-        <p className="text-sm text-gray-400">Không có đơn.</p>
+        <p className="text-sm text-slate-500">Không có đơn.</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm min-w-[640px]">
             <tbody>
               {orders.map((o) => (
-                <tr key={o.id} className="border-t border-gray-100 first:border-t-0">
-                  <td className="py-2 font-mono text-xs text-gray-500">{o.code}</td>
-                  <td className="py-2 text-gray-800">
+                <tr key={o.id} className="border-t border-tiktok-border/60 first:border-t-0">
+                  <td className="py-2 font-mono text-xs text-slate-400">{o.code}</td>
+                  <td className="py-2 text-white">
                     {o.planName} · {o.months} tháng
                   </td>
-                  <td className="py-2 text-gray-700">{vnd(o.amount)}</td>
-                  <td className="py-2 font-mono text-[11px] text-gray-400 max-w-[120px] truncate">{o.userId}</td>
+                  <td className="py-2 text-slate-200">{vnd(o.amount)}</td>
+                  <td className="py-2 font-mono text-[11px] text-slate-500 max-w-[120px] truncate">{o.userId}</td>
                   <td className="py-2">
                     <Badge tone={STATUS[o.status].tone}>{STATUS[o.status].label}</Badge>
                   </td>
-                  <td className="py-2 text-xs text-gray-400">{fmtDate(o.createdAt)}</td>
+                  <td className="py-2 text-xs text-slate-500">{fmtDate(o.createdAt)}</td>
                   <td className="py-2 text-right">
                     {o.status === "pending" && (
                       <button className={btnGhost} onClick={() => confirmPaid(o)}>

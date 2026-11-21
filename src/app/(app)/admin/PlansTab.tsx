@@ -195,7 +195,7 @@ export function PlansTab() {
               />
             </div>
           </div>
-          <label className="flex items-center gap-2 text-xs text-gray-600">
+          <label className="flex items-center gap-2 text-xs text-slate-300">
             <input type="checkbox" checked={form.isActive} onChange={(e) => set("isActive", e.target.checked)} />
             Đang bán
           </label>
@@ -216,18 +216,18 @@ export function PlansTab() {
       <Card title={`Các gói (${plans.length})`}>
         <div className="space-y-2">
           {plans.map((p) => (
-            <div key={p.id} className="border border-gray-200 bg-gray-50/60 rounded-md p-3 flex items-start justify-between gap-3">
+            <div key={p.id} className="border border-tiktok-border bg-black/30 rounded-xl p-3 flex items-start justify-between gap-3">
               <div className="min-w-0 space-y-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-[13px] font-medium text-gray-800">{p.name}</span>
-                  <span className="text-[11px] text-gray-400 font-mono">{p.code}</span>
+                  <span className="text-[13px] font-medium text-white">{p.name}</span>
+                  <span className="text-[11px] text-slate-500 font-mono">{p.code}</span>
                   {!p.isActive && <Badge tone="gray">Ngừng bán</Badge>}
                 </div>
-                <p className="text-xs text-gray-600">
+                <p className="text-xs text-slate-300">
                   {p.limit} link/{PERIOD_VI[p.period]} · domain riêng: {p.maxCustomDomains || "không"} ·{" "}
                   {p.systemDomains.length ? `domain: ${p.systemDomains.join(", ")}` : "mọi domain hệ thống"}
                 </p>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-slate-500">
                   {p.prices.length ? p.prices.map((x) => `${x.months}th ${vnd(x.price)}`).join(" · ") : "Không bán (gói miễn phí)"}
                 </p>
               </div>

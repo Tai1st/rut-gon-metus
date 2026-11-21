@@ -8,14 +8,14 @@ import { SESSION_COOKIE } from "@/lib/config";
  * và chỉ cho đi tới các nhóm route của tính năng này.
  */
 const ALLOWED = ["links", "link-plans", "link-orders", "link-domains"];
-const ALLOWED_AUTH = new Set(["me", "change-password"]);
+const ALLOWED_AUTH = new Set(["me"]);
 
 type Ctx = { params: Promise<{ path: string[] }> };
 
 async function forward(req: NextRequest, ctx: Ctx) {
   const { path } = await ctx.params;
   const [head, second] = path;
-  const ok = ALLOWED.includes(head) || (head === "auth" && ALLOWED_AUTH.has(second));
+  const ok = ALLOWED.includes(head) || (head === "link-auth" && ALLOWED_AUTH.has(second));
   if (!ok) return NextResponse.json({ message: "Not found" }, { status: 404 });
 
   const token = (await cookies()).get(SESSION_COOKIE)?.value;

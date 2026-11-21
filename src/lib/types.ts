@@ -1,4 +1,4 @@
-export type Me = { id: string; username: string; role: "admin" | "user" | string };
+export type Me = { id: string; username: string; fullName?: string; role: "admin" | "user" | "shop" | string };
 
 export type LinkItem = {
   id: string;

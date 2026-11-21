@@ -131,18 +131,18 @@ export default function DashboardPage() {
           <button className={btnPrimary} disabled={busy || !url.trim() || exhausted}>
             {busy ? "Đang tạo…" : "Tạo link"}
           </button>
-          {exhausted && <p className="text-xs text-red-500">Đã hết hạn mức, hãy nâng cấp gói ở tab “Gói & thanh toán”.</p>}
+          {exhausted && <p className="text-xs text-red-400">Đã hết hạn mức, hãy nâng cấp gói ở tab “Gói & thanh toán”.</p>}
         </form>
       </Card>
 
       <Card title={`Link của bạn (${links.length})`}>
         {links.length === 0 ? (
-          <p className="text-sm text-gray-400">Chưa có link nào.</p>
+          <p className="text-sm text-slate-500">Chưa có link nào.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full table-fixed leading-normal text-sm min-w-[640px]">
               <thead>
-                <tr className="text-xs text-gray-500 text-left">
+                <tr className="text-xs text-slate-400 text-left">
                   <th className="pb-2 font-medium">Link</th>
                   <th className="pb-2 font-medium w-20">Lượt bấm</th>
                   <th className="pb-2 font-medium w-32">Tạo lúc</th>
@@ -151,21 +151,21 @@ export default function DashboardPage() {
               </thead>
               <tbody>
                 {links.map((l) => (
-                  <tr key={l.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="py-2.5 pr-3 border-t border-gray-100 overflow-hidden">
+                  <tr key={l.id} className="hover:bg-tiktok-card/5 transition-colors">
+                    <td className="py-2.5 pr-3 border-t border-tiktok-border/60 overflow-hidden">
                       <div className="flex flex-col min-w-0">
                         <div className="flex items-center gap-1.5">
-                          <span className="truncate text-[13px] font-medium text-gray-800">{l.title}</span>
+                          <span className="truncate text-[13px] font-medium text-white">{l.title}</span>
                           <Badge tone={l.kind === "campaign" ? "amber" : "blue"}>
                             {l.kind === "campaign" ? "Chiến dịch" : "Sản phẩm"}
                           </Badge>
                         </div>
-                        <span className="truncate text-[11px] text-gray-400 font-mono mt-0.5">{shortUrl(l)}</span>
+                        <span className="truncate text-[11px] text-slate-500 font-mono mt-0.5">{shortUrl(l)}</span>
                       </div>
                     </td>
-                    <td className="py-2.5 border-t border-gray-100 text-gray-700">{l.clicks}</td>
-                    <td className="py-2.5 border-t border-gray-100 text-xs text-gray-500">{fmtDate(l.createdAt)}</td>
-                    <td className="py-2.5 border-t border-gray-100 text-right space-x-2 whitespace-nowrap">
+                    <td className="py-2.5 border-t border-tiktok-border/60 text-slate-200">{l.clicks}</td>
+                    <td className="py-2.5 border-t border-tiktok-border/60 text-xs text-slate-400">{fmtDate(l.createdAt)}</td>
+                    <td className="py-2.5 border-t border-tiktok-border/60 text-right space-x-2 whitespace-nowrap">
                       <button className={btnGhost} onClick={() => copy(l)}>
                         {copied === l.id ? "Đã chép ✓" : "Sao chép"}
                       </button>

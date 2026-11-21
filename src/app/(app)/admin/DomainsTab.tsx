@@ -51,7 +51,7 @@ export function DomainsTab() {
             <Label>Tên miền (đã trỏ DNS và có HTTPS về trang này)</Label>
             <input className={inputCls} value={host} onChange={(e) => setHost(e.target.value)} placeholder="abc.com" />
           </div>
-          <label className="flex items-center gap-2 text-xs text-gray-600">
+          <label className="flex items-center gap-2 text-xs text-slate-300">
             <input type="checkbox" checked={isDefault} onChange={(e) => setIsDefault(e.target.checked)} />
             Đặt làm tên miền mặc định
           </label>
@@ -64,13 +64,13 @@ export function DomainsTab() {
 
       <Card title={`Kho tên miền (${items.length})`}>
         {items.length === 0 ? (
-          <p className="text-sm text-gray-400">Chưa có tên miền nào. Khi chưa có, link dùng tên miền của trang đang truy cập.</p>
+          <p className="text-sm text-slate-500">Chưa có tên miền nào. Khi chưa có, link dùng tên miền của trang đang truy cập.</p>
         ) : (
           <div className="space-y-2">
             {items.map((d) => (
-              <div key={d.id} className="border border-gray-200 bg-gray-50/60 rounded-md p-3 flex items-center justify-between gap-3">
+              <div key={d.id} className="border border-tiktok-border bg-black/30 rounded-xl p-3 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="truncate text-[13px] font-medium text-gray-800">{d.host}</span>
+                  <span className="truncate text-[13px] font-medium text-white">{d.host}</span>
                   {d.isDefault && <Badge tone="blue">Mặc định</Badge>}
                   <Badge tone={d.status === "active" ? "green" : "gray"}>{d.status === "active" ? "Đang bật" : "Đã tắt"}</Badge>
                 </div>

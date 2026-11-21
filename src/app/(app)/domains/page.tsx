@@ -79,11 +79,11 @@ export default function DomainsPage() {
             />
           </div>
           <ErrorBox message={error} />
-          {note && <p className="text-xs text-green-600">{note}</p>}
+          {note && <p className="text-xs text-emerald-400">{note}</p>}
           <button className={btnPrimary} disabled={busy === "add" || !host.trim()}>
             Thêm tên miền
           </button>
-          <p className="text-[11px] text-gray-400">
+          <p className="text-[11px] text-slate-500">
             Chỉ các gói có hỗ trợ tên miền riêng mới thêm được. Sau khi thêm, bạn cần tạo bản ghi DNS để xác minh quyền
             sở hữu.
           </p>
@@ -92,14 +92,14 @@ export default function DomainsPage() {
 
       <Card title={`Tên miền của bạn (${items.length})`}>
         {items.length === 0 ? (
-          <p className="text-sm text-gray-400">Chưa có tên miền riêng nào.</p>
+          <p className="text-sm text-slate-500">Chưa có tên miền riêng nào.</p>
         ) : (
           <div className="space-y-3">
             {items.map((d) => (
-              <div key={d.id} className="border border-gray-200 rounded-md p-3 bg-gray-50/60 space-y-2">
+              <div key={d.id} className="border border-tiktok-border rounded-xl p-3 bg-black/30 space-y-2">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 min-w-0">
-                    <span className="truncate text-[13px] font-medium text-gray-800">{d.host}</span>
+                    <span className="truncate text-[13px] font-medium text-white">{d.host}</span>
                     <Badge tone={d.status === "active" ? "green" : "amber"}>
                       {d.status === "active" ? "Đang hoạt động" : "Chờ xác minh"}
                     </Badge>
@@ -116,7 +116,7 @@ export default function DomainsPage() {
                   </div>
                 </div>
                 {d.status !== "active" && d.dns && (
-                  <div className="text-xs text-gray-600 space-y-1">
+                  <div className="text-xs text-slate-300 space-y-1">
                     <p>Thêm bản ghi DNS sau tại nơi quản lý tên miền, đợi vài phút rồi bấm “Xác minh”:</p>
                     <DnsRow label="TXT · tên" value={d.dns.txt.name} />
                     <DnsRow label="TXT · giá trị" value={d.dns.txt.value} />
@@ -135,11 +135,11 @@ export default function DomainsPage() {
 function DnsRow({ label, value }: { label: string; value: string }) {
   const [ok, setOk] = useState(false);
   return (
-    <div className="flex items-center justify-between gap-2 bg-white border border-gray-200 rounded px-2 py-1">
-      <span className="text-gray-400 flex-shrink-0">{label}</span>
+    <div className="flex items-center justify-between gap-2 bg-tiktok-card border border-tiktok-border rounded px-2 py-1">
+      <span className="text-slate-500 flex-shrink-0">{label}</span>
       <span className="font-mono text-[11px] truncate">{value}</span>
       <button
-        className="text-blue-600 hover:text-blue-700 flex-shrink-0"
+        className="text-tiktok-cyan hover:text-white flex-shrink-0"
         onClick={async () => {
           await copyText(value);
           setOk(true);

@@ -71,7 +71,7 @@ export function MembersTab() {
             </div>
           </div>
           <ErrorBox message={error} />
-          {ok && <p className="text-xs text-green-600">{ok}</p>}
+          {ok && <p className="text-xs text-emerald-400">{ok}</p>}
           <button className={btnPrimary} disabled={!userId.trim() || !planCode}>
             Gán gói
           </button>
@@ -80,15 +80,15 @@ export function MembersTab() {
 
       <Card title={`Người đang dùng gói được gán (${members.length})`}>
         {members.length === 0 ? (
-          <p className="text-sm text-gray-400">Chưa có ai được gán gói.</p>
+          <p className="text-sm text-slate-500">Chưa có ai được gán gói.</p>
         ) : (
           <table className="w-full text-sm">
             <tbody>
               {members.map((m) => (
-                <tr key={m.id} className="border-t border-gray-100 first:border-t-0">
-                  <td className="py-2 font-mono text-[11px] text-gray-500">{m.userId}</td>
-                  <td className="py-2 text-gray-800">{m.planCode}</td>
-                  <td className="py-2 text-xs text-gray-400">{m.expiresAt ? `Hết hạn ${fmtDate(m.expiresAt)}` : "Không hết hạn"}</td>
+                <tr key={m.id} className="border-t border-tiktok-border/60 first:border-t-0">
+                  <td className="py-2 font-mono text-[11px] text-slate-400">{m.userId}</td>
+                  <td className="py-2 text-white">{m.planCode}</td>
+                  <td className="py-2 text-xs text-slate-500">{m.expiresAt ? `Hết hạn ${fmtDate(m.expiresAt)}` : "Không hết hạn"}</td>
                 </tr>
               ))}
             </tbody>
