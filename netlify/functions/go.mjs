@@ -43,6 +43,7 @@ ${rec.image ? `<img src="${esc(rec.image)}" alt="">` : ""}
   var ua=navigator.userAgent;
   var android=/Android/i.test(ua), ios=/iPhone|iPad|iPod/i.test(ua);
   if(!android && !ios){ location.replace(web); return; }
+  if(ios){ location.replace(app); return; }
   var left=false;
   document.addEventListener('visibilitychange',function(){ if(document.hidden) left=true; });
   window.addEventListener('pagehide',function(){ left=true; });

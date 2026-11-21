@@ -50,10 +50,13 @@ export function buildAppLink(webUrl, productId) {
     needlaunchlog: "1",
     page_name: "reflow_pdp",
     params_url: webUrl,
-    requestParams: JSON.stringify({ product_id: [productId] }),
-    is_commerce: "1",
     refer: "web",
+    requestParams: JSON.stringify({ product_id: [productId] }),
+    trackParams: "{}",
+    is_commerce: "1",
   });
+  // Giống deeplink gốc của TikTok: lặp lại các tham số của link web (chain_key, checksum, ...) ở cấp ngoài.
+  for (const [k, v] of new URL(webUrl).searchParams) q.append(k, v);
   return "snssdk1180://ec/pdp?" + q.toString();
 }
 
