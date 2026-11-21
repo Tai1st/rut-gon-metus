@@ -41,7 +41,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const link = await loadLink(code, await currentHost());
   if (!link) return {};
   return {
-    title: link.title,
+    // absolute: không gắn hậu tố thương hiệu, thẻ xem trước chỉ hiện tên sản phẩm.
+    title: { absolute: link.title },
     // Mô tả đúng điểm đến để thẻ xem trước không lấy nhầm mô tả mặc định của trang chủ.
     description: "Xem trên TikTok Shop",
     openGraph: {

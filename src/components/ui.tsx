@@ -109,8 +109,7 @@ export function Logo({ size = "md" }: { size?: "md" | "lg" }) {
         </svg>
       </div>
       <span className={`${text} font-black tracking-tight text-white leading-none`}>
-        Rút gọn<span className="text-tiktok-pink"> link</span>
-        <span className="text-tiktok-cyan"> Shop</span>
+        Metus<span className="text-tiktok-pink"> Link</span>
       </span>
     </div>
   );

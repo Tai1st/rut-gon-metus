@@ -311,7 +311,7 @@ export default async function Home() {
 
       <footer className="border-t border-tiktok-border/60 bg-black/40 py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
-          <span>© {new Date().getFullYear()} Rút gọn link Shop</span>
+          <span>© {new Date().getFullYear()} Metus Link</span>
           <span>Công cụ không liên kết với TikTok. TikTok là thương hiệu của chủ sở hữu tương ứng.</span>
         </div>
       </footer>

@@ -55,7 +55,7 @@ function Brand() {
         </div>
       </div>
       <span className="text-lg font-extrabold tracking-tight text-white">
-        Rút gọn<span className="text-tiktok-pink"> link</span>
+        Metus<span className="text-tiktok-pink"> Link</span>
       </span>
     </div>
   );
@@ -406,7 +406,7 @@ export function AppShell({ me, quota, counts, children }: { me: Me; quota: Quota
                 <Menu className="w-5 h-5" />
               </button>
               <Link href="/" className="font-extrabold text-base tracking-tight text-white" aria-label="Về trang chủ">
-                Rút gọn<span className="text-tiktok-pink"> link</span>
+                Metus<span className="text-tiktok-pink"> Link</span>
               </Link>
             </div>
 

@@ -15,7 +15,7 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Rút gọn link TikTok Shop",
+  title: { default: "Metus Link – Rút gọn link TikTok Shop", template: "%s · Metus Link" },
   description: "Rút gọn link sản phẩm và chiến dịch TikTok Shop, tự mở ứng dụng TikTok trên điện thoại.",
 };
 
