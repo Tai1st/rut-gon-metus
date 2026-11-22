@@ -64,6 +64,9 @@ export type Plan = {
   maxCustomDomains: number;
   isActive: boolean;
   isRecommended?: boolean;
+  /** % giảm khi mua 3 tháng / 1 năm; giá các kỳ này do hệ thống tự tính từ giá 1 tháng. */
+  discount3?: number;
+  discount12?: number;
   sortOrder: number;
 };
 

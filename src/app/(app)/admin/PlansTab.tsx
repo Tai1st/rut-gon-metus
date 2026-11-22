@@ -31,14 +31,6 @@ function buildPrices(price1: number, disc3: number, disc12: number): PricePoint[
   ];
 }
 
-/** % giảm hiện tại của một kỳ so với mua lẻ từng tháng (để điền sẵn khi sửa gói). */
-function discountOf(prices: PricePoint[], months: number, fallback: number) {
-  const base = prices.find((x) => x.months === 1)?.price;
-  const price = prices.find((x) => x.months === months)?.price;
-  if (!base || !price) return fallback;
-  return Math.max(0, Math.min(90, Math.round((1 - price / (base * months)) * 100)));
-}
-
 export function PlansTab() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [form, setForm] = useState(EMPTY);
@@ -67,8 +59,8 @@ export function PlansTab() {
       limit: p.limit,
       period: p.period,
       price1: String(p.prices.find((x) => x.months === 1)?.price ?? ""),
-      disc3: discountOf(p.prices, 3, 17),
-      disc12: discountOf(p.prices, 12, 24),
+      disc3: p.discount3 ?? 17,
+      disc12: p.discount12 ?? 24,
       systemDomains: p.systemDomains.join(", "),
       maxCustomDomains: p.maxCustomDomains,
       isActive: p.isActive,
@@ -93,13 +85,16 @@ export function PlansTab() {
       setBusy(false);
       return;
     }
-    const prices = buildPrices(price1, Number(form.disc3) || 0, Number(form.disc12) || 0);
+    // Chỉ gửi giá 1 tháng; backend tự tính giá 3 tháng và 1 năm theo % giảm.
+    const prices: PricePoint[] = price1 > 0 ? [{ months: 1, price: price1 }] : [];
     const payload = {
       name: form.name.trim(),
       description: form.description.trim(),
       limit: Number(form.limit),
       period: form.period,
       prices,
+      discount3: Number(form.disc3) || 0,
+      discount12: Number(form.disc12) || 0,
       systemDomains: form.systemDomains
         .split(",")
         .map((s) => s.trim().toLowerCase())
