@@ -70,7 +70,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: { absolute: link.title },
       description,
       openGraph: { title: link.title, description, type: "website", url: `https://${host}/s/${link.code}`, images },
-      twitter: { card: images ? "summary_large_image" : "summary", title: link.title, description, images },
+      // Như trang mẫu: luôn dùng thẻ lớn (summary_large_image).
+      twitter: { card: "summary_large_image", title: link.title, description, images },
     };
   }
   return {
@@ -142,17 +143,15 @@ export default async function Page({ params, searchParams }: Props) {
     if (!BOT_UA.test(ua)) void beFetch(countUrl, { internalKey: INTERNAL_KEY }).catch(() => null);
     const jj = (v: string) => JSON.stringify(v).replace(/</g, "\\u003c");
     return (
+      // Trang trung gian theo mẫu: nền #f8f8f8, chỉ có vòng xoay "Redirecting", tự chuyển sau 0,5 giây.
       <div className="redir-page">
-        <div className="redir-loader" aria-hidden>
-          Redirecting
-        </div>
-        <p className="redir-text">
-          Đang chuyển hướng tới <strong>{target.hostname}</strong>…
-        </p>
-        <a className="redir-link" href={target.href} rel="noopener noreferrer">
-          Bấm vào đây nếu trang không tự chuyển
-        </a>
-        <script dangerouslySetInnerHTML={{ __html: `setTimeout(function(){location.replace(${jj(target.href)})},500);` }} />
+        {/* React 19 đưa thẻ <meta> lên <head>; thời điểm cập nhật nội dung theo giây, như trang mẫu */}
+        <meta property="og:updated_time" content={String(Math.floor(Date.now() / 1000))} />
+        <noscript>
+          <meta httpEquiv="refresh" content={`0.5;url=${target.href}`} />
+        </noscript>
+        <div className="redir-loader">Redirecting</div>
+        <script dangerouslySetInnerHTML={{ __html: `window.setTimeout(function(){window.location.href = ${jj(target.href)};}, 500);` }} />
       </div>
     );
   }
