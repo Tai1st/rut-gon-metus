@@ -2,6 +2,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import type { ReactNode } from "react";
 import { Ambient, Logo } from "@/components/ui";
+import { PricingBoard } from "@/components/PricingBoard";
 import { beFetch } from "@/lib/be";
 import { SESSION_COOKIE } from "@/lib/config";
 
@@ -13,11 +14,8 @@ type PublicPlan = {
   period: "day" | "week" | "month";
   prices: { months: number; price: number }[];
   maxCustomDomains: number;
+  isRecommended: boolean;
 };
-
-const PERIOD_VI = { day: "ngày", week: "tuần", month: "tháng" } as const;
-const vnd = (n: number) => new Intl.NumberFormat("vi-VN").format(n) + "đ";
-const cycleLabel = (m: number) => (m === 12 ? "01 năm" : m % 12 === 0 ? `${String(m / 12).padStart(2, "0")} năm` : `${String(m).padStart(2, "0")} tháng`);
 
 /** Bảng giá công khai lấy từ backend; backend lỗi thì ẩn khu vực giá chứ không làm hỏng trang chủ. */
 async function loadPlans(): Promise<PublicPlan[]> {
@@ -31,15 +29,6 @@ async function loadPlans(): Promise<PublicPlan[]> {
   }
 }
 
-function planFeatures(p: PublicPlan) {
-  return [
-    `${p.limit} link rút gọn / ${PERIOD_VI[p.period]}`,
-    "Link sản phẩm và chiến dịch TikTok Shop",
-    "Tự mở ứng dụng TikTok trên điện thoại",
-    p.maxCustomDomains > 0 ? `Thêm tối đa ${p.maxCustomDomains} tên miền riêng` : "Dùng tên miền của hệ thống",
-    ...(p.code === "free" ? [] : ["Thanh toán QR, tự động kích hoạt gói"]),
-  ];
-}
 
 // Trang chủ (landing). Chỉ đọc cookie để đổi nút "Đăng nhập" thành "Vào trang quản lý", nên render động.
 export const dynamic = "force-dynamic";
@@ -324,77 +313,8 @@ export default async function Home() {
               </p>
             </div>
 
-            <div
-              className={`grid grid-cols-1 gap-6 max-w-5xl mx-auto ${
-                plans.length >= 3 ? "md:grid-cols-2 lg:grid-cols-3" : plans.length === 2 ? "md:grid-cols-2 max-w-3xl" : "max-w-md"
-              }`}
-            >
-              {plans.map((p) => {
-                const isFree = p.code === "free";
-                const cycles = [...p.prices].sort((a, b) => a.months - b.months);
-                const main = cycles[0];
-                const base = cycles.find((c) => c.months === 1)?.price;
-                const sellable = !isFree && cycles.length > 0;
-                return (
-                  <div
-                    key={p.code}
-                    className="bg-tiktok-surface border border-tiktok-border rounded-3xl p-6 flex flex-col justify-between space-y-6 hover:border-tiktok-cyan transition-colors"
-                  >
-                    <div className="space-y-4">
-                      <div className={`text-xs font-extrabold uppercase tracking-wider ${isFree ? "text-slate-400" : "text-tiktok-pink"}`}>
-                        {p.name}
-                        {isFree && " • Miễn phí"}
-                      </div>
-                      <div className="text-3xl font-black">
-                        {isFree ? (
-                          "0đ"
-                        ) : main ? (
-                          <>
-                            {vnd(main.price)} <span className="text-xs font-normal text-slate-400">/ {cycleLabel(main.months)}</span>
-                          </>
-                        ) : (
-                          <span className="text-xl text-slate-300">Liên hệ</span>
-                        )}
-                      </div>
-                      {sellable && cycles.length > 1 && (
-                        <div className="text-[11px] text-slate-400 space-y-0.5">
-                          {cycles.slice(1).map((c) => {
-                            const pct = base ? Math.round((1 - c.price / (base * c.months)) * 100) : 0;
-                            return (
-                              <div key={c.months}>
-                                {cycleLabel(c.months)}: <strong className="text-slate-200">{vnd(c.price)}</strong>
-                                {pct > 0 && <span className="text-emerald-400"> (tiết kiệm {pct}%)</span>}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                      <p className="text-xs text-slate-400 min-h-[16px]">{p.description}</p>
-                      <ul className="space-y-2.5 text-xs pt-3 border-t border-tiktok-border">
-                        {planFeatures(p).map((f) => (
-                          <li key={f} className="flex items-center gap-2">
-                            <svg viewBox="0 0 24 24" className="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <circle cx="12" cy="12" r="10" />
-                              <path d="m9 12 2 2 4-4" />
-                            </svg>
-                            <span>{f}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <Link
-                      href={isFree ? (loggedIn ? "/dashboard" : "/register") : loggedIn ? "/plans" : "/register"}
-                      className={
-                        sellable
-                          ? "w-full text-center py-3 rounded-xl tiktok-glow-btn text-white font-extrabold text-xs"
-                          : "w-full text-center py-3 rounded-xl bg-tiktok-card border border-tiktok-border hover:border-tiktok-cyan font-bold text-xs transition-colors"
-                      }
-                    >
-                      {isFree ? "Bắt đầu miễn phí" : sellable ? (loggedIn ? `Nâng cấp ${p.name}` : "Đăng ký để nâng cấp") : "Đăng ký để liên hệ"}
-                    </Link>
-                  </div>
-                );
-              })}
+            <div className="max-w-6xl mx-auto w-full">
+              <PricingBoard mode="landing" plans={plans} loggedIn={loggedIn} />
             </div>
           </section>
         )}

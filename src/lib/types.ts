@@ -48,6 +48,7 @@ export type Plan = {
   systemDomains: string[];
   maxCustomDomains: number;
   isActive: boolean;
+  isRecommended?: boolean;
   sortOrder: number;
 };
 

@@ -15,6 +15,7 @@ const EMPTY = {
   systemDomains: "",
   maxCustomDomains: 0,
   isActive: true,
+  isRecommended: false,
 };
 
 /** "1:99000, 3:249000" -> [{months:1, price:99000}, ...] */
@@ -60,6 +61,7 @@ export function PlansTab() {
       systemDomains: p.systemDomains.join(", "),
       maxCustomDomains: p.maxCustomDomains,
       isActive: p.isActive,
+      isRecommended: !!p.isRecommended,
     });
     setError("");
   }
@@ -92,6 +94,7 @@ export function PlansTab() {
         .filter(Boolean),
       maxCustomDomains: Number(form.maxCustomDomains),
       isActive: form.isActive,
+      isRecommended: form.isRecommended,
     };
     try {
       if (editing) await api(`link-plans/${editing}`, { method: "PATCH", body: payload });
@@ -199,10 +202,16 @@ export function PlansTab() {
               />
             </div>
           </div>
-          <label className="flex items-center gap-2 text-xs text-slate-300">
-            <input type="checkbox" checked={form.isActive} onChange={(e) => set("isActive", e.target.checked)} />
-            Đang bán
-          </label>
+          <div className="flex flex-wrap items-center gap-5">
+            <label className="flex items-center gap-2 text-xs text-slate-300">
+              <input type="checkbox" checked={form.isActive} onChange={(e) => set("isActive", e.target.checked)} />
+              Đang bán
+            </label>
+            <label className="flex items-center gap-2 text-xs text-slate-300">
+              <input type="checkbox" checked={form.isRecommended} onChange={(e) => set("isRecommended", e.target.checked)} />
+              Gắn nhãn “Khuyên chọn” trên bảng giá
+            </label>
+          </div>
           <ErrorBox message={error} />
           <div className="flex gap-2">
             <button className={btnPrimary} disabled={busy || !form.name.trim() || (!editing && !form.code.trim())}>
