@@ -1,9 +1,12 @@
 import { cache } from "react";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { beFetch } from "@/lib/be";
 import { INTERNAL_KEY } from "@/lib/config";
+import { pickTarget, withParams, type RedirectRules } from "@/lib/redirect";
+import { isUnlocked, unlockCookieName } from "@/lib/unlock";
+import { unlockLink } from "./actions";
 
 /** Đích hợp lệ của link thường: chỉ http/https (đã kiểm tra khi tạo, kiểm tra lại ở đây cho chắc). */
 function safeHttpUrl(u: string): URL | null {
@@ -28,9 +31,11 @@ type PublicLink = {
   webUrl: string;
   androidUrl: string;
   iosUrl: string;
-};
+  hasPassword?: boolean;
+  lockId?: string;
+} & Omit<RedirectRules, "webUrl">;
 
-type Props = { params: Promise<{ code: string }> };
+type Props = { params: Promise<{ code: string }>; searchParams?: Promise<{ e?: string }> };
 
 const BOT_UA = /facebookexternalhit|facebot|twitterbot|slackbot|whatsapp|telegrambot|linkedinbot|bot\b|crawler|spider|preview/i;
 
@@ -52,6 +57,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { code } = await params;
   const link = await loadLink(code, await currentHost());
   if (!link) return {};
+  if (link.kind === "url" && link.hasPassword) {
+    // Link có mật khẩu: không để lộ mô tả/ảnh/đích trong thẻ xem trước.
+    return { title: { absolute: link.title }, description: "Liên kết được bảo vệ bằng mật khẩu", robots: { index: false } };
+  }
   if (link.kind === "url" && link.redirectType !== "direct") {
     const target = safeHttpUrl(link.webUrl);
     const description = link.description || (target ? `Đang chuyển hướng tới ${target.hostname}` : "");
@@ -83,8 +92,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function Page({ params }: Props) {
+export default async function Page({ params, searchParams }: Props) {
   const { code } = await params;
+  const { e: errCode } = (await searchParams) ?? {};
   const host = await currentHost();
   const link = await loadLink(code, host);
   if (!link) notFound();
@@ -95,7 +105,34 @@ export default async function Page({ params }: Props) {
   if (link.kind === "url") {
     // Link thường: trang trung gian có thẻ xem trước do người tạo đặt, rồi tự chuyển sau 0,5 giây.
     // Mọi người và mọi trình quét nhận cùng một trang; bot không được tính lượt bấm.
-    const target = safeHttpUrl(link.webUrl);
+    if (link.hasPassword && !isUnlocked(code, link.lockId ?? "", (await cookies()).get(unlockCookieName(code))?.value)) {
+      const msg = errCode === "1" ? "Mật khẩu không đúng." : errCode === "2" ? "Nhập sai quá nhiều lần, hãy thử lại sau ít phút." : errCode === "3" ? "Có lỗi xảy ra, hãy thử lại." : "";
+      return (
+        <div className="redir-page">
+          <form action={unlockLink.bind(null, code)} className="redir-lock">
+            <h1 className="redir-lock-title">Liên kết được bảo vệ</h1>
+            <p className="redir-text">Nhập mật khẩu để tiếp tục.</p>
+            <input name="password" type="password" required autoFocus autoComplete="off" maxLength={64} placeholder="Mật khẩu" className="redir-lock-input" />
+            {msg && <p className="redir-lock-error">{msg}</p>}
+            <button type="submit" className="redir-lock-btn">
+              Mở liên kết
+            </button>
+          </form>
+        </div>
+      );
+    }
+    // Chọn đích theo địa lý > thiết bị > ngôn ngữ (nếu người tạo đặt quy tắc), rồi gắn tham số UTM.
+    const h = await headers();
+    const picked = pickTarget(
+      { ...link, webUrl: link.webUrl },
+      {
+        country: h.get("cf-ipcountry") ?? undefined,
+        region: h.get("cf-region") ?? undefined,
+        userAgent: ua,
+        acceptLanguage: h.get("accept-language") ?? undefined,
+      },
+    );
+    const target = safeHttpUrl(withParams(picked, link.params)) ?? safeHttpUrl(link.webUrl);
     if (!target) notFound();
     if (link.redirectType === "direct") {
       // Trực tiếp: chuyển hướng HTTP 307 ngay. Đếm xong rồi mới chuyển vì sau redirect() không chạy tiếp được.

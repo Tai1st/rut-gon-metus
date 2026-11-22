@@ -28,7 +28,7 @@ function parseLines(text: string) {
 export default function BulkPage() {
   const router = useRouter();
   const [text, setText] = useState("");
-  const [mode, setMode] = useState<ShortenMode>("deeplink");
+  const [mode, setMode] = useState<ShortenMode>("normal");
   const [domain, setDomain] = useState("");
   const [rows, setRows] = useState<Row[]>([]);
   const [running, setRunning] = useState(false);

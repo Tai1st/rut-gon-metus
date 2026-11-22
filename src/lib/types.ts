@@ -1,5 +1,10 @@
 export type Me = { id: string; username: string; fullName?: string; role: "admin" | "user" | "shop" | string };
 
+export type GeoRule = { country: string; region?: string; url: string };
+export type DeviceRule = { device: string; url: string };
+export type LangRule = { lang: string; url: string };
+export type UrlParam = { key: string; value: string };
+
 export type LinkItem = {
   id: string;
   code: string;
@@ -9,6 +14,13 @@ export type LinkItem = {
   redirectType?: "direct" | "interstitial";
   note?: string;
   image: string;
+  hasPassword?: boolean;
+  /** Link thường tạo từ link TikTok: mã của deeplink được tạo kèm (đích của link này). */
+  deeplinkCode?: string;
+  geoRules?: GeoRule[];
+  deviceRules?: DeviceRule[];
+  langRules?: LangRule[];
+  params?: UrlParam[];
   webUrl: string;
   domain: string;
   clicks: number;

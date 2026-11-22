@@ -185,7 +185,7 @@ function SidebarBody({ me, quota, counts, onNavigate }: { me: Me; quota: Quota |
         <div>
           <button onClick={() => setTools((v) => !v)} className={`${ITEM} justify-between ${inTools ? "text-white" : ""}`}>
             <div className="flex items-center gap-3">
-              <Zap className="w-4 h-4 shrink-0 text-amber-400" />
+              <Zap className="w-4 h-4 shrink-0 text-tiktok-pink" />
               <span>Công cụ</span>
             </div>
             <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${tools ? "" : "-rotate-90"}`} />
@@ -195,8 +195,8 @@ function SidebarBody({ me, quota, counts, onNavigate }: { me: Me; quota: Quota |
               {[
                 { href: "/bio", label: "Tạo trang Bio Link", icon: <Smartphone className="w-3.5 h-3.5 text-tiktok-cyan" /> },
                 { href: "/bulk", label: "Rút gọn hàng loạt", icon: <Layers className="w-3.5 h-3.5 text-tiktok-pink" /> },
-                { href: "/qr", label: "Tạo mã QR tùy chỉnh", icon: <QrCode className="w-3.5 h-3.5 text-emerald-400" /> },
-                { href: "/inspector", label: "Kiểm tra Deep Link", icon: <ScanSearch className="w-3.5 h-3.5 text-purple-400" /> },
+                { href: "/qr", label: "Tạo mã QR tùy chỉnh", icon: <QrCode className="w-3.5 h-3.5 text-tiktok-cyan" /> },
+                { href: "/inspector", label: "Kiểm tra Deep Link", icon: <ScanSearch className="w-3.5 h-3.5 text-tiktok-pink" /> },
               ].map((t) => (
                 <Link
                   key={t.href}
@@ -429,7 +429,7 @@ export function AppShell({ me, quota, counts, children }: { me: Me; quota: Quota
             <div className="flex items-center gap-2.5 sm:gap-4">
               <Link
                 href="/plans"
-                className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 hover:bg-amber-500/20 transition-colors"
+                className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-tiktok-pink/10 text-tiktok-pink border border-tiktok-pink/25 hover:bg-tiktok-pink/20 transition-colors"
               >
                 <Crown className="w-3.5 h-3.5" />
                 <span>Nâng cấp</span>

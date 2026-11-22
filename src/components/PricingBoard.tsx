@@ -130,12 +130,12 @@ export function PricingBoard({ plans, currentCode, freeDisabled, mode, loggedIn,
 
   return (
     <div className="space-y-8">
-      {/* Bảng màu gradient dùng chung cho icon (tím -> cam) */}
+      {/* Bảng màu gradient dùng chung cho icon (hồng -> cyan) */}
       <svg width="0" height="0" className="absolute" aria-hidden>
         <defs>
           <linearGradient id="plan-grad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#8b3dff" />
-            <stop offset="100%" stopColor="#ff8a3d" />
+            <stop offset="0%" stopColor="#fe2c55" />
+            <stop offset="100%" stopColor="#25f4ee" />
           </linearGradient>
         </defs>
       </svg>
@@ -153,7 +153,7 @@ export function PricingBoard({ plans, currentCode, freeDisabled, mode, loggedIn,
                   type="button"
                   onClick={() => setSel(m)}
                   className={`px-5 sm:px-8 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 ${
-                    on ? "bg-violet-600 text-white shadow-md" : "text-zinc-300 hover:text-white"
+                    on ? "bg-tiktok-pink text-white shadow-md" : "text-zinc-300 hover:text-white"
                   }`}
                 >
                   <span>{cycleLabel(m)}</span>
@@ -168,17 +168,17 @@ export function PricingBoard({ plans, currentCode, freeDisabled, mode, loggedIn,
       {/* Hàng gói miễn phí (nằm ngang, toàn chiều rộng) */}
       {free && (
         <div
-          className={`rounded-2xl border p-5 sm:p-6 flex flex-col lg:flex-row lg:items-center gap-5 lg:gap-8 bg-sky-500/5 ${
-            freeIsCurrent ? "border-emerald-500/60" : "border-sky-500/20"
+          className={`rounded-2xl border p-5 sm:p-6 flex flex-col lg:flex-row lg:items-center gap-5 lg:gap-8 bg-tiktok-cyan/5 ${
+            freeIsCurrent ? "border-emerald-500/60" : "border-tiktok-cyan/20"
           }`}
         >
           <div className="flex items-center gap-4 lg:w-64 shrink-0">
-            <div className="w-14 h-14 rounded-full bg-blue-500 flex items-center justify-center shrink-0">
+            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-tiktok-pink to-tiktok-cyan flex items-center justify-center shrink-0">
               <Send className="w-6 h-6 text-white" />
             </div>
             <div>
               <div className="text-xl font-extrabold">{free.name}</div>
-              <div className="text-xs font-bold text-violet-400">Miễn phí</div>
+              <div className="text-xs font-bold text-tiktok-cyan">Miễn phí</div>
             </div>
           </div>
 
@@ -261,8 +261,8 @@ export function PricingBoard({ plans, currentCode, freeDisabled, mode, loggedIn,
                   <div className="text-center">
                     {price ? (
                       <div className="flex items-baseline justify-center gap-1">
-                        <span className="text-3xl font-black bg-gradient-to-r from-violet-500 to-orange-400 bg-clip-text text-transparent">{vnd(price)}</span>
-                        <span className="text-sm font-bold text-orange-400">/{cycleUnit(cycle!)}</span>
+                        <span className="text-3xl font-black bg-gradient-to-r from-tiktok-pink to-tiktok-cyan bg-clip-text text-transparent">{vnd(price)}</span>
+                        <span className="text-sm font-bold text-tiktok-cyan">/{cycleUnit(cycle!)}</span>
                       </div>
                     ) : (
                       <div className="text-2xl font-black text-zinc-300">{p.prices.length === 0 ? "Liên hệ" : "Không bán kỳ này"}</div>

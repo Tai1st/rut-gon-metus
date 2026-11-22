@@ -99,7 +99,7 @@ export default function PlansPage() {
   return (
     <div className="space-y-10 py-2">
       <div className="text-center max-w-3xl mx-auto space-y-3">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-violet-500/15 border border-violet-500/30 text-violet-300 text-xs font-semibold">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-tiktok-pink/15 border border-tiktok-pink/30 text-tiktok-pink text-xs font-semibold">
           <Crown className="w-3.5 h-3.5 text-amber-500" />
           <span>Nâng cấp gói để tạo nhiều link hơn</span>
         </div>
@@ -196,7 +196,7 @@ export default function PlansPage() {
           >
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-extrabold flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-violet-500" />
+                <ShieldCheck className="w-5 h-5 text-tiktok-cyan" />
                 <span>Xác nhận nâng cấp gói</span>
               </h3>
               <button onClick={() => setConfirmPlan(null)} className="p-1.5 rounded-lg bg-zinc-800 text-zinc-400 hover:text-white" aria-label="Đóng">
@@ -211,7 +211,7 @@ export default function PlansPage() {
               </div>
               <div className="flex items-center justify-between text-xs text-zinc-400">
                 <span>Gói lựa chọn</span>
-                <span className="font-bold text-violet-400">{confirmPlan.name}</span>
+                <span className="font-bold text-tiktok-cyan">{confirmPlan.name}</span>
               </div>
               <div className="flex items-center justify-between text-xs text-zinc-400">
                 <span>Chu kỳ thanh toán</span>
@@ -228,8 +228,8 @@ export default function PlansPage() {
 
             <div className="space-y-2">
               <label className="block text-xs font-semibold text-zinc-400">Phương thức thanh toán</label>
-              <div className="flex items-center gap-2 p-3 rounded-xl border border-violet-500 bg-violet-500/10 text-xs font-semibold">
-                <Check className="w-4 h-4 text-violet-400" />
+              <div className="flex items-center gap-2 p-3 rounded-xl border border-tiktok-cyan bg-tiktok-cyan/10 text-xs font-semibold">
+                <Check className="w-4 h-4 text-tiktok-cyan" />
                 <span>Chuyển khoản QR / Ngân hàng (tự động kích hoạt)</span>
               </div>
               {current === confirmPlan.code ? (
