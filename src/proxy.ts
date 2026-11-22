@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { beFetch } from "@/lib/be";
-import { INTERNAL_KEY } from "@/lib/config";
+import { INTERNAL_KEY, LINK_ONLY_HOSTS } from "@/lib/config";
 import { isInterstitial, unlockCookieName, type PublicLinkData } from "@/lib/interstitial";
 import { isReservedCode } from "@/lib/reserved";
 
@@ -13,6 +13,18 @@ import { isReservedCode } from "@/lib/reserved";
  */
 export async function proxy(req: NextRequest) {
   const parts = req.nextUrl.pathname.split("/").filter(Boolean);
+  const host = (req.headers.get("x-forwarded-host") ?? req.headers.get("host") ?? "").split(",")[0].trim();
+
+  // Tên miền chỉ dành cho link rút gọn: không phục vụ trang web (trang chủ, đăng nhập, bảng điều khiển, API).
+  if (LINK_ONLY_HOSTS.has(host.split(":")[0].toLowerCase())) {
+    const isCode = (s: string) => /^[A-Za-z0-9_-]+$/.test(s);
+    const allowed =
+      (parts.length === 1 && isCode(parts[0]) && !isReservedCode(parts[0])) ||
+      (parts.length === 2 && (parts[0] === "s" || parts[0] === "r") && isCode(parts[1]));
+    if (!allowed) return new NextResponse("Not found", { status: 404, headers: { "cache-control": "no-store" } });
+  }
+  if (parts[0] === "api") return NextResponse.next();
+
   // Mã chỉ gồm chữ, số, gạch ngang và gạch dưới (loại luôn tên tệp như favicon.ico).
   const bare = parts.length === 1 && /^[A-Za-z0-9_-]+$/.test(parts[0]) && !isReservedCode(parts[0]);
   const prefixed = parts.length === 2 && parts[0] === "s";
@@ -24,7 +36,6 @@ export async function proxy(req: NextRequest) {
     return bare ? NextResponse.rewrite(new URL(`/s/${encodeURIComponent(code)}`, req.url)) : NextResponse.next();
   }
 
-  const host = (req.headers.get("x-forwarded-host") ?? req.headers.get("host") ?? "").split(",")[0].trim();
   const res = await beFetch(`/internal/links/${encodeURIComponent(code)}?host=${encodeURIComponent(host)}`, { internalKey: INTERNAL_KEY }).catch(() => null);
   if (!res || !res.ok) return NextResponse.next(); // /s/<mã> tự hiện 404; /<mã> không có trang nào khớp nên cũng 404
 
@@ -36,6 +47,6 @@ export async function proxy(req: NextRequest) {
 }
 
 export const config = {
-  // Bỏ qua tệp tĩnh (có dấu chấm) và tài nguyên nội bộ của Next.
-  matcher: ["/((?!_next/|api/|.*\\..*).*)"],
+  // Bỏ qua tệp tĩnh (có dấu chấm) và tài nguyên nội bộ của Next. Đường dẫn /api vẫn qua proxy để chặn trên tên miền chỉ dành cho link.
+  matcher: ["/((?!_next/|.*\\..*).*)"],
 };
