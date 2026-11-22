@@ -150,7 +150,7 @@ export function PlansTab() {
           </div>
           <div className="grid sm:grid-cols-3 gap-3">
             <div>
-              <Label>Số link mỗi chu kỳ</Label>
+              <Label>Số deeplink mỗi chu kỳ</Label>
               <input
                 className={inputCls}
                 type="number"
@@ -237,7 +237,7 @@ export function PlansTab() {
                   {!p.isActive && <Badge tone="gray">Ngừng bán</Badge>}
                 </div>
                 <p className="text-xs text-slate-300">
-                  {p.limit} link/{PERIOD_VI[p.period]} · domain riêng: {p.maxCustomDomains || "không"} ·{" "}
+                  {p.limit} deeplink/{PERIOD_VI[p.period]} · domain riêng: {p.maxCustomDomains || "không"} ·{" "}
                   {p.systemDomains.length ? `domain: ${p.systemDomains.join(", ")}` : "mọi domain hệ thống"}
                 </p>
                 <p className="text-xs text-slate-500">

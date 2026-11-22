@@ -96,7 +96,7 @@ function PlanCard({ quota }: { quota: Quota | null }) {
               ? "Gói miễn phí đã tắt"
               : unlimited
                 ? "Không giới hạn link"
-                : `Đã dùng ${quota.used}/${quota.limit} link/${PERIOD_VI[quota.period]}`}
+                : `Đã dùng ${quota.used}/${quota.limit} deeplink/${PERIOD_VI[quota.period]}`}
           </span>
           <Link href="/plans" className="text-tiktok-cyan hover:underline shrink-0">
             Nâng cấp

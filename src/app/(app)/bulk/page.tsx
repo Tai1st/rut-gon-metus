@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { api, copyText } from "@/lib/api";
 import type { LinkItem } from "@/lib/types";
 import { Badge, btnGhost, Card, ErrorBox, inputCls } from "@/components/ui";
+import { ModeToggle, type ShortenMode } from "@/components/ModeToggle";
 
 const MAX_LINES = 20;
 
@@ -27,6 +28,7 @@ function parseLines(text: string) {
 export default function BulkPage() {
   const router = useRouter();
   const [text, setText] = useState("");
+  const [mode, setMode] = useState<ShortenMode>("deeplink");
   const [domain, setDomain] = useState("");
   const [rows, setRows] = useState<Row[]>([]);
   const [running, setRunning] = useState(false);
@@ -51,7 +53,7 @@ export default function BulkPage() {
       try {
         const l = await api<LinkItem>("links", {
           method: "POST",
-          body: { url: list[i], ...(domain.trim() && { domain: domain.trim() }) },
+          body: { mode, url: list[i], ...(domain.trim() && { domain: domain.trim() }) },
         });
         patch(i, { status: "ok", short: `https://${l.domain || window.location.host}/s/${l.code}`, title: l.title });
       } catch (e) {
@@ -81,17 +83,22 @@ export default function BulkPage() {
       <div>
         <h1 className="text-2xl font-extrabold tracking-tight">Rút gọn hàng loạt</h1>
         <p className="text-xs sm:text-sm text-zinc-400">
-          Dán nhiều link TikTok Shop, mỗi link một dòng (tối đa {MAX_LINES} link mỗi lượt). Mỗi link tính vào hạn mức của gói.
+          Chọn loại rút gọn rồi dán nhiều link, mỗi link một dòng (tối đa {MAX_LINES} link mỗi lượt). Chỉ deeplink TikTok tính vào hạn mức của gói, link thường không giới hạn.
         </p>
       </div>
 
       <Card title="Danh sách link">
         <div className="space-y-3">
+          <ModeToggle value={mode} onChange={setMode} disabled={running} />
           <textarea
             className={`${inputCls} font-mono text-xs h-44 resize-y`}
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder={"https://vt.tiktok.com/ZS…/\nhttps://vt.tiktok.com/ZS…/\nhttps://www.tiktok.com/view/product/…"}
+            placeholder={
+              mode === "normal"
+                ? "https://example.com/trang-1\nhttps://example.com/trang-2"
+                : "https://vt.tiktok.com/ZS…/\nhttps://vt.tiktok.com/ZS…/\nhttps://www.tiktok.com/view/product/…"
+            }
             disabled={running}
           />
           <div className="grid sm:grid-cols-2 gap-3">

@@ -3,8 +3,11 @@ export type Me = { id: string; username: string; fullName?: string; role: "admin
 export type LinkItem = {
   id: string;
   code: string;
-  kind: "product" | "campaign";
+  kind: "product" | "campaign" | "url";
   title: string;
+  description?: string;
+  redirectType?: "direct" | "interstitial";
+  note?: string;
   image: string;
   webUrl: string;
   domain: string;

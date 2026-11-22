@@ -186,7 +186,7 @@ export function PricingBoard({ plans, currentCode, freeDisabled, mode, loggedIn,
             <div className="space-y-2">
               <div>
                 <strong className="text-white">{freeDisabled ? 0 : free.limit}</strong>{" "}
-                <span className="text-zinc-400">link rút gọn / {PERIOD_VI[free.period]}</span>
+                <span className="text-zinc-400">deeplink TikTok / {PERIOD_VI[free.period]}</span>
               </div>
               <div>
                 <strong className="text-white">{free.maxCustomDomains > 0 ? free.maxCustomDomains : "—"}</strong>{" "}
@@ -275,9 +275,10 @@ export function PricingBoard({ plans, currentCode, freeDisabled, mode, loggedIn,
                   {p.description && <p className="text-center text-xs text-zinc-500">{p.description}</p>}
 
                   <div className="divide-y divide-zinc-800/80">
-                    <Row label="Link rút gọn">
+                    <Row label="Deeplink TikTok Shop">
                       {p.limit}/{PERIOD_VI[p.period]}
                     </Row>
+                    <Row label="Link rút gọn thường">Không giới hạn</Row>
                     <Row label="Tên miền riêng">{p.maxCustomDomains > 0 ? p.maxCustomDomains : <No />}</Row>
                     <Row label="Link sản phẩm & chiến dịch">
                       <Yes />

@@ -1,17 +1,29 @@
 import { cache } from "react";
 import { headers } from "next/headers";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { beFetch } from "@/lib/be";
 import { INTERNAL_KEY } from "@/lib/config";
+
+/** Đích hợp lệ của link thường: chỉ http/https (đã kiểm tra khi tạo, kiểm tra lại ở đây cho chắc). */
+function safeHttpUrl(u: string): URL | null {
+  try {
+    const x = new URL(u);
+    return x.protocol === "http:" || x.protocol === "https:" ? x : null;
+  } catch {
+    return null;
+  }
+}
 
 // Trang công khai, luôn render ở server để Facebook crawler thấy sẵn thẻ og + App Links (al:*) trong HTML.
 export const dynamic = "force-dynamic";
 
 type PublicLink = {
   code: string;
-  kind: "product" | "campaign";
+  kind: "product" | "campaign" | "url";
   title: string;
+  description?: string;
+  redirectType?: "direct" | "interstitial";
   image: string;
   webUrl: string;
   androidUrl: string;
@@ -40,6 +52,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { code } = await params;
   const link = await loadLink(code, await currentHost());
   if (!link) return {};
+  if (link.kind === "url" && link.redirectType !== "direct") {
+    const target = safeHttpUrl(link.webUrl);
+    const description = link.description || (target ? `Đang chuyển hướng tới ${target.hostname}` : "");
+    const images = link.image ? [link.image] : undefined;
+    const host = await currentHost();
+    return {
+      title: { absolute: link.title },
+      description,
+      openGraph: { title: link.title, description, type: "website", url: `https://${host}/s/${link.code}`, images },
+      twitter: { card: images ? "summary_large_image" : "summary", title: link.title, description, images },
+    };
+  }
   return {
     // absolute: không gắn hậu tố thương hiệu, thẻ xem trước chỉ hiện tên sản phẩm.
     title: { absolute: link.title },
@@ -66,11 +90,39 @@ export default async function Page({ params }: Props) {
   if (!link) notFound();
 
   const ua = (await headers()).get("user-agent") ?? "";
+  const countUrl = `/internal/links/${encodeURIComponent(code)}?count=1&host=${encodeURIComponent(host)}`;
+
+  if (link.kind === "url") {
+    // Link thường: trang trung gian có thẻ xem trước do người tạo đặt, rồi tự chuyển sau 0,5 giây.
+    // Mọi người và mọi trình quét nhận cùng một trang; bot không được tính lượt bấm.
+    const target = safeHttpUrl(link.webUrl);
+    if (!target) notFound();
+    if (link.redirectType === "direct") {
+      // Trực tiếp: chuyển hướng HTTP 307 ngay. Đếm xong rồi mới chuyển vì sau redirect() không chạy tiếp được.
+      if (!BOT_UA.test(ua)) await beFetch(countUrl, { internalKey: INTERNAL_KEY }).catch(() => null);
+      redirect(target.href);
+    }
+    if (!BOT_UA.test(ua)) void beFetch(countUrl, { internalKey: INTERNAL_KEY }).catch(() => null);
+    const jj = (v: string) => JSON.stringify(v).replace(/</g, "\\u003c");
+    return (
+      <div className="redir-page">
+        <div className="redir-loader" aria-hidden>
+          Redirecting
+        </div>
+        <p className="redir-text">
+          Đang chuyển hướng tới <strong>{target.hostname}</strong>…
+        </p>
+        <a className="redir-link" href={target.href} rel="noopener noreferrer">
+          Bấm vào đây nếu trang không tự chuyển
+        </a>
+        <script dangerouslySetInnerHTML={{ __html: `setTimeout(function(){location.replace(${jj(target.href)})},500);` }} />
+      </div>
+    );
+  }
+
   if (!BOT_UA.test(ua)) {
-    // Đếm lượt bấm, không chờ kết quả để không làm chậm việc chuyển trang.
-    void beFetch(`/internal/links/${encodeURIComponent(code)}?count=1&host=${encodeURIComponent(host)}`, {
-      internalKey: INTERNAL_KEY,
-    }).catch(() => null);
+    // Deeplink: đếm lượt bấm, không chờ kết quả để không làm chậm việc chuyển trang.
+    void beFetch(countUrl, { internalKey: INTERNAL_KEY }).catch(() => null);
   }
 
   const j = (v: string) => JSON.stringify(v).replace(/</g, "\\u003c");

@@ -6,14 +6,18 @@ import { api, copyText } from "@/lib/api";
 import type { Domain, LinkItem } from "@/lib/types";
 import { Badge, btnGhost, ErrorBox, inputCls, Modal } from "./ui";
 import { QrModal } from "./QrModal";
+import { MODE_PLACEHOLDER, ModeToggle, type ShortenMode } from "./ModeToggle";
+import { EMPTY_NORMAL, NormalOptions, normalBody, type NormalOpts } from "./NormalOptions";
 
 type Available = { system: Domain[]; custom: Domain[] };
 
 /** Cửa sổ tạo link nhanh (mở bằng Ctrl+K hoặc ô "Tạo link nhanh…" trên thanh trên). */
 export function QuickCreateModal({ onClose }: { onClose: () => void }) {
   const router = useRouter();
+  const [mode, setMode] = useState<ShortenMode>("deeplink");
   const [url, setUrl] = useState("");
   const [title, setTitle] = useState("");
+  const [opts, setOpts] = useState<NormalOpts>(EMPTY_NORMAL);
   const [domain, setDomain] = useState("");
   const [domains, setDomains] = useState<Available>({ system: [], custom: [] });
   const [busy, setBusy] = useState(false);
@@ -44,7 +48,12 @@ export function QuickCreateModal({ onClose }: { onClose: () => void }) {
     try {
       const l = await api<LinkItem>("links", {
         method: "POST",
-        body: { url: url.trim(), ...(title.trim() && { title: title.trim() }), ...(domain && { domain }) },
+        body: {
+          mode,
+          url: url.trim(),
+          ...(mode === "deeplink" ? title.trim() && { title: title.trim() } : normalBody(opts)),
+          ...(domain && { domain }),
+        },
       });
       setCreated(l);
       router.refresh(); // cập nhật thẻ hạn mức ở thanh bên và danh sách
@@ -70,8 +79,8 @@ export function QuickCreateModal({ onClose }: { onClose: () => void }) {
           <div className="space-y-4">
             <div className="flex items-center gap-2 flex-wrap">
               <Badge tone="green">Tạo thành công</Badge>
-              <Badge tone={created.kind === "campaign" ? "amber" : "pink"}>
-                {created.kind === "campaign" ? "Chiến dịch" : "Sản phẩm"}
+              <Badge tone={created.kind === "campaign" ? "amber" : created.kind === "url" ? "blue" : "pink"}>
+                {created.kind === "campaign" ? "Chiến dịch" : created.kind === "url" ? "Link thường" : "Sản phẩm"}
               </Badge>
             </div>
             <div className="font-mono font-bold text-tiktok-cyan break-all">{shortUrl(created)}</div>
@@ -89,6 +98,7 @@ export function QuickCreateModal({ onClose }: { onClose: () => void }) {
                   setCreated(null);
                   setUrl("");
                   setTitle("");
+                  setOpts(EMPTY_NORMAL);
                 }}
               >
                 Tạo link khác
@@ -97,19 +107,29 @@ export function QuickCreateModal({ onClose }: { onClose: () => void }) {
           </div>
         ) : (
           <form onSubmit={submit} className="space-y-3">
+            <ModeToggle value={mode} onChange={setMode} disabled={busy} />
             <input
               ref={input}
               className={inputCls}
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              placeholder="Dán link TikTok Shop (sản phẩm hoặc chiến dịch)"
+              placeholder={MODE_PLACEHOLDER[mode]}
             />
-            <input
-              className={inputCls}
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Tiêu đề (tuỳ chọn)"
-            />
+            {mode === "deeplink" ? (
+              <input
+                className={inputCls}
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Tiêu đề (tuỳ chọn)"
+              />
+            ) : (
+              <NormalOptions
+                value={opts}
+                onChange={setOpts}
+                disabled={busy}
+                prefix={`${domain || (typeof window !== "undefined" ? window.location.host : "")}/s/`}
+              />
+            )}
             <select className={`${inputCls} cursor-pointer`} value={domain} onChange={(e) => setDomain(e.target.value)}>
               <option value="">Tên miền mặc định</option>
               {domains.system.map((d) => (

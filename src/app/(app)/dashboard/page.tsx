@@ -8,6 +8,8 @@ import { useMe } from "@/components/AppShell";
 import { QrModal } from "@/components/QrModal";
 import { PERIOD_VI, type Domain, type LinkItem, type Quota } from "@/lib/types";
 import { Badge, btnGhost, btnPrimary, ErrorBox, inputCls, Modal } from "@/components/ui";
+import { MODE_PLACEHOLDER, ModeToggle, type ShortenMode } from "@/components/ModeToggle";
+import { EMPTY_NORMAL, NormalOptions, normalBody, type NormalOpts } from "@/components/NormalOptions";
 
 type Available = { system: Domain[]; custom: Domain[] };
 type Tab = "active" | "archived";
@@ -53,8 +55,10 @@ export default function DashboardPage() {
   const setTab = (t: Tab) => router.replace(`/dashboard?tab=${t}`, { scroll: false });
   const [search, setSearch] = useState("");
   const [kind, setKind] = useState("");
+  const [mode, setMode] = useState<ShortenMode>("deeplink");
   const [url, setUrl] = useState("");
   const [title, setTitle] = useState("");
+  const [opts, setOpts] = useState<NormalOpts>(EMPTY_NORMAL);
   const [domain, setDomain] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -94,6 +98,7 @@ export default function DashboardPage() {
       clicks: links.reduce((n, l) => n + l.clicks, 0),
       products: links.filter((l) => l.kind === "product").length,
       campaigns: links.filter((l) => l.kind === "campaign").length,
+      plain: links.filter((l) => l.kind === "url").length,
     }),
     [links],
   );
@@ -114,10 +119,16 @@ export default function DashboardPage() {
     try {
       await api("links", {
         method: "POST",
-        body: { url: url.trim(), ...(title.trim() && { title: title.trim() }), ...(domain && { domain }) },
+        body: {
+          mode,
+          url: url.trim(),
+          ...(mode === "deeplink" ? title.trim() && { title: title.trim() } : normalBody(opts)),
+          ...(domain && { domain }),
+        },
       });
       setUrl("");
       setTitle("");
+      setOpts(EMPTY_NORMAL);
       await load();
       router.refresh(); // cập nhật thẻ hạn mức ở thanh bên
     } catch (err) {
@@ -154,6 +165,8 @@ export default function DashboardPage() {
   }
 
   const exhausted = quota?.remaining === 0;
+  // Link thường không giới hạn; chỉ deeplink TikTok mới bị chặn khi hết hạn mức.
+  const blocked = mode === "deeplink" && exhausted;
   const unlimited = quota?.limit === null;
 
   return (
@@ -179,12 +192,12 @@ export default function DashboardPage() {
         <Kpi
           label="Tổng liên kết"
           value={String(links.length)}
-          note={`${totals.products} sản phẩm · ${totals.campaigns} chiến dịch`}
+          note={`${totals.products} sản phẩm · ${totals.campaigns} chiến dịch · ${totals.plain} link thường`}
           dot="bg-tiktok-cyan"
         />
         <Kpi label="Tổng lượt bấm" value={String(totals.clicks)} note="Không tính bot quét link" dot="bg-tiktok-pink" />
         <Kpi
-          label="Còn lại hôm nay"
+          label="Deeplink còn lại"
           value={quota ? (unlimited ? "∞" : String(quota.remaining)) : "—"}
           valueCls={exhausted ? "text-red-400" : "text-emerald-400"}
           note={
@@ -193,7 +206,7 @@ export default function DashboardPage() {
                 ? "Gói miễn phí đã tắt"
                 : unlimited
                   ? "Không giới hạn"
-                  : `Trên ${quota.limit} link/${PERIOD_VI[quota.period]}`
+                  : `Trên ${quota.limit} deeplink/${PERIOD_VI[quota.period]}`
               : "Đang tải…"
           }
           noteCls={exhausted ? "text-red-400" : "text-zinc-500"}
@@ -215,12 +228,15 @@ export default function DashboardPage() {
           Tạo nhanh liên kết rút gọn
         </h3>
         <form onSubmit={create} className="grid grid-cols-1 md:grid-cols-12 gap-3">
+          <div className="md:col-span-12">
+            <ModeToggle value={mode} onChange={setMode} disabled={busy} />
+          </div>
           <div className="md:col-span-7">
             <input
               className={inputCls}
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              placeholder="Dán link TikTok Shop (vt.tiktok.com/… hoặc link sản phẩm, chiến dịch)"
+              placeholder={MODE_PLACEHOLDER[mode]}
             />
           </div>
           <div className="md:col-span-5">
@@ -238,29 +254,42 @@ export default function DashboardPage() {
               ))}
             </select>
           </div>
-          <div className="md:col-span-7">
-            <input
-              className={inputCls}
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Tiêu đề (tuỳ chọn, mặc định lấy tên sản phẩm)"
-            />
-          </div>
-          <div className="md:col-span-5">
+          {mode === "normal" ? (
+            <div className="md:col-span-12">
+              <NormalOptions
+                value={opts}
+                onChange={setOpts}
+                disabled={busy}
+                prefix={`${domain || (typeof window !== "undefined" ? window.location.host : "")}/s/`}
+              />
+            </div>
+          ) : (
+            <div className="md:col-span-7">
+              <input
+                className={inputCls}
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Tiêu đề (tuỳ chọn, mặc định lấy tên sản phẩm)"
+              />
+            </div>
+          )}
+          <div className={mode === "normal" ? "md:col-span-12" : "md:col-span-5"}>
             <button
               type="submit"
               className="w-full tiktok-glow-btn text-white font-semibold py-2.5 px-4 rounded-xl text-sm"
-              disabled={busy || !url.trim() || exhausted}
+              disabled={busy || !url.trim() || blocked}
             >
-              {busy ? "Đang tạo…" : "Rút gọn ngay"}
+              {busy ? "Đang tạo…" : mode === "normal" ? "Rút gọn link" : "Rút gọn deeplink"}
             </button>
           </div>
         </form>
         <div className="mt-3 space-y-2">
           <ErrorBox message={error} />
-          {quota?.disabled ? (
+          {mode === "normal" ? (
+            <p className="text-xs text-zinc-500">Link rút gọn thường không giới hạn số lượng.</p>
+          ) : quota?.disabled ? (
             <p className="text-xs text-red-400">
-              Gói miễn phí hiện đã tắt, bạn cần mua gói để tạo link mới.{" "}
+              Gói miễn phí hiện đã tắt, bạn cần mua gói để tạo deeplink TikTok mới.{" "}
               <Link href="/plans" className="underline font-semibold">
                 Xem các gói
               </Link>
@@ -268,11 +297,11 @@ export default function DashboardPage() {
           ) : (
             exhausted && (
               <p className="text-xs text-red-400">
-                Đã hết hạn mức, hãy{" "}
+                Đã hết hạn mức deeplink, hãy{" "}
                 <Link href="/plans" className="underline font-semibold">
                   nâng cấp gói
-                </Link>
-                .
+                </Link>{" "}
+                (link thường vẫn tạo được không giới hạn).
               </p>
             )
           )}
@@ -316,6 +345,7 @@ export default function DashboardPage() {
               <option value="">Tất cả loại</option>
               <option value="product">Sản phẩm</option>
               <option value="campaign">Chiến dịch</option>
+              <option value="url">Link thường</option>
             </select>
           </div>
         </div>
@@ -338,8 +368,8 @@ export default function DashboardPage() {
                 <div className="space-y-1 overflow-hidden min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-mono font-bold text-sm sm:text-base text-tiktok-cyan truncate">{shortUrl(l)}</span>
-                    <Badge tone={l.kind === "campaign" ? "amber" : "pink"}>
-                      {l.kind === "campaign" ? "Chiến dịch" : "Sản phẩm"}
+                    <Badge tone={l.kind === "campaign" ? "amber" : l.kind === "url" ? "blue" : "pink"}>
+                      {l.kind === "campaign" ? "Chiến dịch" : l.kind === "url" ? "Link thường" : "Sản phẩm"}
                     </Badge>
                     <span className="text-[11px] text-zinc-500">• {l.clicks} lượt bấm</span>
                   </div>
@@ -415,6 +445,11 @@ export default function DashboardPage() {
 /** Đổi tiêu đề hiển thị khi chia sẻ link (tên sản phẩm trong thẻ xem trước). */
 function EditTitleModal({ link, onClose, onSaved }: { link: LinkItem; onClose: () => void; onSaved: () => Promise<void> }) {
   const [title, setTitle] = useState(link.title);
+  const [desc, setDesc] = useState(link.description ?? "");
+  const [image, setImage] = useState(link.image ?? "");
+  const [redirectType, setRedirectType] = useState<"direct" | "interstitial">(link.redirectType ?? "interstitial");
+  const [note, setNote] = useState(link.note ?? "");
+  const plain = link.kind === "url";
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -423,7 +458,7 @@ function EditTitleModal({ link, onClose, onSaved }: { link: LinkItem; onClose: (
     setBusy(true);
     setError("");
     try {
-      await api(`links/${link.id}`, { method: "PATCH", body: { title: title.trim() } });
+      await api(`links/${link.id}`, { method: "PATCH", body: { title: title.trim(), ...(plain && { description: desc.trim(), image: image.trim(), redirectType, note: note.trim() }) } });
       await onSaved();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Không lưu được");
@@ -432,10 +467,21 @@ function EditTitleModal({ link, onClose, onSaved }: { link: LinkItem; onClose: (
   }
 
   return (
-    <Modal title="Sửa tiêu đề" onClose={onClose}>
+    <Modal title={plain ? "Sửa thẻ xem trước" : "Sửa tiêu đề"} onClose={onClose}>
       <form onSubmit={save} className="space-y-3">
         <p className="text-[11px] text-zinc-500">Tiêu đề hiện trong thẻ xem trước khi bạn chia sẻ link (ví dụ trên Facebook).</p>
-        <input className={inputCls} value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} autoFocus />
+        <input className={inputCls} value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} autoFocus placeholder="Tiêu đề" />
+        {plain && (
+          <>
+            <select className={`${inputCls} cursor-pointer`} value={redirectType} onChange={(e) => setRedirectType(e.target.value as "direct" | "interstitial")}>
+              <option value="interstitial">Trang trung gian (có thẻ xem trước)</option>
+              <option value="direct">Trực tiếp</option>
+            </select>
+            <input className={inputCls} value={note} onChange={(e) => setNote(e.target.value)} maxLength={200} placeholder="Ghi chú nội bộ" />
+            <input className={inputCls} value={desc} onChange={(e) => setDesc(e.target.value)} maxLength={300} placeholder="Mô tả xem trước" />
+            <input className={inputCls} value={image} onChange={(e) => setImage(e.target.value)} placeholder="Ảnh xem trước (https://…)" />
+          </>
+        )}
         <ErrorBox message={error} />
         <div className="flex gap-2">
           <button className={btnPrimary} disabled={busy || !title.trim()}>

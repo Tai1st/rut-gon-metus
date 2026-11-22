@@ -221,11 +221,11 @@ export default function SettingsPage() {
               </div>
               {q.disabled && (
                 <p className="text-[11px] text-red-400">
-                  Gói miễn phí hiện đã tắt, bạn cần mua gói để tạo link mới. Các link đã tạo vẫn hoạt động.
+                  Gói miễn phí hiện đã tắt, bạn cần mua gói để tạo deeplink mới (link thường vẫn không giới hạn). Các link đã tạo vẫn hoạt động.
                 </p>
               )}
               {!q.disabled && nearLimit && (
-                <p className="text-[11px] text-red-400">Sắp hết hạn mức, bạn có thể nâng cấp để tạo thêm link.</p>
+                <p className="text-[11px] text-red-400">Sắp hết hạn mức, bạn có thể nâng cấp để tạo thêm deeplink.</p>
               )}
             </div>
 
