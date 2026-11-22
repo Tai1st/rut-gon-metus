@@ -43,8 +43,8 @@ export function ShortenForm({
 }) {
   const [mode, setMode] = useState<ShortenMode>("normal");
   const [multi, setMulti] = useState(false);
-  // Link thường + link TikTok Shop: tự tạo deeplink làm đích (bật sẵn, bỏ chọn để rút gọn link TikTok như link thường).
-  const [autoDeeplink, setAutoDeeplink] = useState(true);
+  // Link thường + link TikTok Shop: tự tạo deeplink làm đích (tắt sẵn, tick để bật; không tick thì rút gọn link TikTok như link thường).
+  const [autoDeeplink, setAutoDeeplink] = useState(false);
   const [showOpts, setShowOpts] = useState(false);
   const [url, setUrl] = useState("");
   const [title, setTitle] = useState("");

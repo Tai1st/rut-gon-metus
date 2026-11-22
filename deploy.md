@@ -22,7 +22,7 @@ pm2 save
 cp deploy/nginx-link.metus.vn.conf /etc/nginx/sites-available/metus-link
 ln -s /etc/nginx/sites-available/metus-link /etc/nginx/sites-enabled/metus-link
 nginx -t && systemctl reload nginx
-certbot --nginx -d link.metus.vn --redirect
+certbot --nginx -d link.metus.vn -d dlieya.click --redirect
 ```
 
 DNS: bản ghi `link.metus.vn` trỏ về VPS (đang qua Cloudflare, giống `api-v3.metus.vn`).
