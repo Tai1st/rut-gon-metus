@@ -12,6 +12,7 @@ import {
   Crown,
   FolderKanban,
   GitFork,
+  Globe,
   Layers,
   Link as LinkIcon,
   Link2,
@@ -19,7 +20,6 @@ import {
   Menu,
   Smartphone,
   QrCode,
-  ScanSearch,
   Settings,
   ShieldCheck,
   SlidersHorizontal,
@@ -111,7 +111,7 @@ function PlanCard({ quota }: { quota: Quota | null }) {
 function SidebarBody({ me, quota, counts, onNavigate }: { me: Me; quota: Quota | null; counts: Counts; onNavigate?: () => void }) {
   const path = usePathname();
   const tab = useSearchParams().get("tab");
-  const inTools = ["/bio", "/bulk", "/qr", "/inspector"].some((p) => path.startsWith(p));
+  const inTools = ["/bio", "/bulk", "/qr"].some((p) => path.startsWith(p));
   const [tools, setTools] = useState(true);
 
   const onDashboard = path === "/dashboard";
@@ -121,6 +121,7 @@ function SidebarBody({ me, quota, counts, onNavigate }: { me: Me; quota: Quota |
     archived: onDashboard && tab === "archived",
     analytics: path.startsWith("/analytics"),
     expired: path.startsWith("/expired"),
+    domains: path.startsWith("/domains"),
     integrations: path.startsWith("/integrations"),
     settings: path.startsWith("/settings"),
     admin: path.startsWith("/admin"),
@@ -176,6 +177,10 @@ function SidebarBody({ me, quota, counts, onNavigate }: { me: Me; quota: Quota |
           </div>
           <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-red-500/15 text-red-400">{counts.expired}</span>
         </Link>
+        <Link href="/domains" onClick={onNavigate} className={cls(isActive.domains)}>
+          <Globe className="w-4 h-4 shrink-0" />
+          <span>Tên miền riêng</span>
+        </Link>
         <Link href="/integrations" onClick={onNavigate} className={cls(isActive.integrations)}>
           <GitFork className="w-4 h-4 shrink-0" />
           <span>Tích hợp</span>
@@ -196,7 +201,6 @@ function SidebarBody({ me, quota, counts, onNavigate }: { me: Me; quota: Quota |
                 { href: "/bio", label: "Tạo trang Bio Link", icon: <Smartphone className="w-3.5 h-3.5 text-tiktok-cyan" /> },
                 { href: "/bulk", label: "Rút gọn hàng loạt", icon: <Layers className="w-3.5 h-3.5 text-tiktok-pink" /> },
                 { href: "/qr", label: "Tạo mã QR tùy chỉnh", icon: <QrCode className="w-3.5 h-3.5 text-tiktok-cyan" /> },
-                { href: "/inspector", label: "Kiểm tra Deep Link", icon: <ScanSearch className="w-3.5 h-3.5 text-tiktok-pink" /> },
               ].map((t) => (
                 <Link
                   key={t.href}
