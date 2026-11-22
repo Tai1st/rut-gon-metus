@@ -44,6 +44,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ code: string }
     pageUrl: `https://${host}/${link.code}`,
     target: target.href,
     updatedTime: Math.floor(Date.now() / 1000),
+    appLinks: link.appLinks,
   });
   return new Response(html, {
     headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store, max-age=0" },

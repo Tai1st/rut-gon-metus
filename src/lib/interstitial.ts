@@ -12,6 +12,8 @@ export type PublicLinkData = {
   webUrl: string;
   hasPassword?: boolean;
   lockId?: string;
+  /** Có khi link thường trỏ tới deeplink của hệ thống: dữ liệu App Links để khai báo thẻ al:*. */
+  appLinks?: { androidUrl: string; iosUrl: string; webUrl: string };
 } & Omit<RedirectRules, "webUrl">;
 
 /** Đích hợp lệ: chỉ http/https. */
@@ -61,7 +63,20 @@ export function renderInterstitial(p: {
   pageUrl: string;
   target: string;
   updatedTime: number;
+  appLinks?: { androidUrl: string; iosUrl: string; webUrl: string };
 }): string {
+  // Khai báo App Links (giống trang deeplink) để Facebook mở thẳng app TikTok khi bấm vào chính đường dẫn này.
+  const al = p.appLinks
+    ? `    <meta property="al:ios:url" content="${esc(p.appLinks.iosUrl)}" />
+    <meta property="al:ios:app_store_id" content="1235601864" />
+    <meta property="al:ios:app_name" content="TikTok" />
+    <meta property="al:android:package" content="com.ss.android.ugc.trill" />
+    <meta property="al:android:url" content="${esc(p.appLinks.androidUrl)}" />
+    <meta property="al:android:app_name" content="TikTok" />
+    <meta property="al:web:url" content="${esc(p.appLinks.webUrl)}" />
+    <meta property="al:web:should_fallback" content="true" />
+`
+    : "";
   const img = p.image
     ? `    <meta property="og:image" content="${esc(p.image)}" />\n    <meta name="twitter:image" content="${esc(p.image)}">\n`
     : "";
@@ -80,7 +95,7 @@ export function renderInterstitial(p: {
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${esc(p.title)}">
     <meta name="twitter:description" content="${esc(p.description)}">
-${img}    <noscript>
+${img}${al}    <noscript>
         <meta http-equiv="refresh" content="0.5;url=${esc(p.target)}">
     </noscript>
     <style>
