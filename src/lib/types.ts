@@ -100,7 +100,8 @@ export type Domain = {
   kind: "system" | "custom";
   status: "pending" | "active" | "disabled";
   isDefault: boolean;
-  dns?: { txt: { name: string; value: string }; pointTo: string | null } | null;
+  /** Cloudflare: nameServers cần đổi; không có Cloudflare: bản ghi TXT xác minh. */
+  dns?: { nameServers?: string[]; txt?: { name: string; value: string }; pointTo?: string | null } | null;
 };
 
 export type Membership = { id: string; userId: string; planCode: string; expiresAt: string | null };

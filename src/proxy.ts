@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { beFetch } from "@/lib/be";
-import { INTERNAL_KEY, LINK_ONLY_HOSTS } from "@/lib/config";
+import { INTERNAL_KEY, isLinkOnlyHost } from "@/lib/config";
 import { isInterstitial, unlockCookieName, type PublicLinkData } from "@/lib/interstitial";
 import { isReservedCode } from "@/lib/reserved";
 
@@ -15,8 +15,8 @@ export async function proxy(req: NextRequest) {
   const parts = req.nextUrl.pathname.split("/").filter(Boolean);
   const host = (req.headers.get("x-forwarded-host") ?? req.headers.get("host") ?? "").split(",")[0].trim();
 
-  // Tên miền chỉ dành cho link rút gọn: không phục vụ trang web (trang chủ, đăng nhập, bảng điều khiển, API).
-  if (LINK_ONLY_HOSTS.has(host.split(":")[0].toLowerCase())) {
+  // Tên miền không phải của web (dlieya.click, tên miền riêng của người dùng…) chỉ dành cho link rút gọn: không phục vụ trang web (trang chủ, đăng nhập, bảng điều khiển, API).
+  if (isLinkOnlyHost(host)) {
     const isCode = (s: string) => /^[A-Za-z0-9_-]+$/.test(s);
     const allowed =
       (parts.length === 1 && isCode(parts[0]) && !isReservedCode(parts[0])) ||

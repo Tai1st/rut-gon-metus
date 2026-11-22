@@ -89,8 +89,7 @@ export default function DomainsPage() {
             Thêm tên miền
           </button>
           <p className="text-[11px] text-slate-500">
-            Chỉ các gói có hỗ trợ tên miền riêng mới thêm được. Sau khi thêm, bạn cần tạo bản ghi DNS để xác minh quyền
-            sở hữu.
+            Chỉ các gói có hỗ trợ tên miền riêng mới thêm được. Sau khi thêm, bạn làm theo hướng dẫn DNS hiện ra bên dưới để kích hoạt.
           </p>
         </form>
       </Card>
@@ -120,7 +119,18 @@ export default function DomainsPage() {
                     </button>
                   </div>
                 </div>
-                {d.status !== "active" && d.dns && (
+                {d.status !== "active" && d.dns?.nameServers && d.dns.nameServers.length > 0 && (
+                  <div className="text-xs text-slate-300 space-y-1">
+                    <p>Đổi nameserver của tên miền tại nơi đăng ký thành hai địa chỉ sau, đợi vài phút (có thể tới vài giờ) rồi bấm “Xác minh”:</p>
+                    {d.dns.nameServers.map((ns, i) => (
+                      <DnsRow key={ns} label={`Nameserver ${i + 1}`} value={ns} />
+                    ))}
+                    <p className="text-[11px] text-slate-500">
+                      Lưu ý: sau khi đổi, toàn bộ DNS của tên miền (email, tên miền phụ khác) sẽ do hệ thống quản lý. Nên dùng tên miền riêng cho link và nhập tên miền gốc (ví dụ example.com).
+                    </p>
+                  </div>
+                )}
+                {d.status !== "active" && d.dns?.txt && (
                   <div className="text-xs text-slate-300 space-y-1">
                     <p>Thêm bản ghi DNS sau tại nơi quản lý tên miền, đợi vài phút rồi bấm “Xác minh”:</p>
                     <DnsRow label="TXT · tên" value={d.dns.txt.name} />

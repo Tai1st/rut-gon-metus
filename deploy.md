@@ -51,3 +51,10 @@ pm2 reload metus-link
 - Server Next chuyển IP thật của khách (`CF-Connecting-IP` / `X-Real-IP`) sang backend qua `X-Forwarded-For`,
   nên giới hạn đăng nhập/đăng ký của backend tính theo từng khách, không tính chung.
 - Đăng ký tự do: bật/tắt đăng ký tự do bằng `LINKS_ALLOW_REGISTRATION` trong `.env` của backend.
+
+## Tên miền riêng của người dùng
+
+- Backend: đặt `LINKS_CNAME_TARGET=link.metus.vn` trong `.env` để trang "Tên miền riêng" hướng dẫn người dùng trỏ CNAME về đây.
+- nginx: vhost `metus-link-default` (xem `deploy/nginx-link.metus.vn.conf`) làm `default_server` để mọi tên miền lạ vào trang link.
+- FE: chỉ `WEB_HOSTS` (mặc định `link.metus.vn`) phục vụ trang web; các tên miền khác (kể cả `dlieya.click`) chỉ phục vụ `/<mã>`, `/s/<mã>`, `/r/<mã>`.
+- HTTPS: người dùng nên đặt tên miền sau Cloudflare (proxy bật, SSL Full). Trỏ thẳng về VPS sẽ không có chứng chỉ hợp lệ.

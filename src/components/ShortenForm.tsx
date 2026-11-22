@@ -127,7 +127,7 @@ export function ShortenForm({
   const domainField = (
     <div>
       <Label>Tên miền</Label>
-      <p className="text-[11px] text-zinc-500 mb-1.5">Chọn tên miền rút gọn cho link (có thể thêm tên miền riêng trong mục Tích hợp)</p>
+      <p className="text-[11px] text-zinc-500 mb-1.5">Chọn tên miền rút gọn cho link (có thể thêm tên miền riêng trong mục Tên miền riêng)</p>
       <select className={`${inputCls} cursor-pointer`} value={domain} onChange={(e) => setDomain(e.target.value)} disabled={busy}>
         <option value="">Tên miền mặc định</option>
         {domains.system.map((d) => (
