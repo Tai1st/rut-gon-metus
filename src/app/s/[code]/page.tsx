@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { beFetch } from "@/lib/be";
 import { INTERNAL_KEY } from "@/lib/config";
+import { isFacebookCrawler } from "@/lib/crawler";
 import { pickTarget, withParams, type RedirectRules } from "@/lib/redirect";
 import { isUnlocked, unlockCookieName } from "@/lib/unlock";
 import { unlockLink } from "./actions";
@@ -84,8 +85,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: "Xem trên TikTok Shop",
       images: link.image ? [link.image] : undefined,
     },
-    // Khai báo app TikTok cho trình duyệt trong Facebook mở thẳng app, không hiện cảnh báo.
-    appLinks: {
+    // Khai báo app TikTok cho Facebook mở thẳng app, không hiện cảnh báo. Chỉ bot Facebook cần thẻ này nên chỉ bot mới nhận.
+    appLinks: !isFacebookCrawler((await headers()).get("user-agent") ?? "") ? undefined : {
       ios: { url: link.iosUrl, app_store_id: "1235601864", app_name: "TikTok" },
       android: { package: "com.ss.android.ugc.trill", url: link.androidUrl, app_name: "TikTok" },
       web: { url: link.webUrl, should_fallback: true },

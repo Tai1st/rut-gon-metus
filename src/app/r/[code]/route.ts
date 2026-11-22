@@ -1,6 +1,7 @@
 import { cookies, headers } from "next/headers";
 import { beFetch } from "@/lib/be";
 import { INTERNAL_KEY } from "@/lib/config";
+import { isFacebookCrawler } from "@/lib/crawler";
 import { isInterstitial, renderInterstitial, resolveTarget, unlockCookieName, type PublicLinkData } from "@/lib/interstitial";
 
 export const dynamic = "force-dynamic";
@@ -44,9 +45,10 @@ export async function GET(_req: Request, ctx: { params: Promise<{ code: string }
     pageUrl: `https://${host}/${link.code}`,
     target: target.href,
     updatedTime: Math.floor(Date.now() / 1000),
-    appLinks: link.appLinks,
+    // Thẻ al:* chỉ dành cho bot Facebook.
+    appLinks: isFacebookCrawler(ua) ? link.appLinks : undefined,
   });
   return new Response(html, {
-    headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store, max-age=0" },
+    headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store, max-age=0", vary: "User-Agent" },
   });
 }
