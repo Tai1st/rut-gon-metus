@@ -11,23 +11,32 @@ const EMPTY = {
   description: "",
   limit: 5,
   period: "day" as Plan["period"],
-  prices: "",
+  price1: "",
+  disc3: 17,
+  disc12: 24,
   systemDomains: "",
   maxCustomDomains: 0,
   isActive: true,
   isRecommended: false,
 };
 
-/** "1:99000, 3:249000" -> [{months:1, price:99000}, ...] */
-function parsePrices(text: string): PricePoint[] {
-  return text
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean)
-    .map((s) => {
-      const [m, p] = s.split(":").map((x) => Number(x.trim()));
-      return { months: m, price: p };
-    });
+/** Giá 3 tháng / 12 tháng tính từ giá 1 tháng và % giảm, làm tròn đến nghìn đồng. */
+function buildPrices(price1: number, disc3: number, disc12: number): PricePoint[] {
+  if (!price1 || price1 <= 0) return [];
+  const at = (months: number, disc: number) => Math.round((price1 * months * (1 - disc / 100)) / 1000) * 1000;
+  return [
+    { months: 1, price: price1 },
+    { months: 3, price: at(3, disc3) },
+    { months: 12, price: at(12, disc12) },
+  ];
+}
+
+/** % giảm hiện tại của một kỳ so với mua lẻ từng tháng (để điền sẵn khi sửa gói). */
+function discountOf(prices: PricePoint[], months: number, fallback: number) {
+  const base = prices.find((x) => x.months === 1)?.price;
+  const price = prices.find((x) => x.months === months)?.price;
+  if (!base || !price) return fallback;
+  return Math.max(0, Math.min(90, Math.round((1 - price / (base * months)) * 100)));
 }
 
 export function PlansTab() {
@@ -57,7 +66,9 @@ export function PlansTab() {
       description: p.description,
       limit: p.limit,
       period: p.period,
-      prices: p.prices.map((x) => `${x.months}:${x.price}`).join(", "),
+      price1: String(p.prices.find((x) => x.months === 1)?.price ?? ""),
+      disc3: discountOf(p.prices, 3, 17),
+      disc12: discountOf(p.prices, 12, 24),
       systemDomains: p.systemDomains.join(", "),
       maxCustomDomains: p.maxCustomDomains,
       isActive: p.isActive,
@@ -76,12 +87,13 @@ export function PlansTab() {
     e.preventDefault();
     setBusy(true);
     setError("");
-    const prices = parsePrices(form.prices);
-    if (prices.some((p) => !Number.isInteger(p.months) || !Number.isInteger(p.price))) {
-      setError('Giá nhập theo dạng "tháng:giá", ví dụ 1:99000, 3:249000');
+    const price1 = Number(form.price1) || 0;
+    if (form.price1.trim() && (!Number.isInteger(price1) || price1 < 0)) {
+      setError("Giá 1 tháng phải là số nguyên không âm");
       setBusy(false);
       return;
     }
+    const prices = buildPrices(price1, Number(form.disc3) || 0, Number(form.disc12) || 0);
     const payload = {
       name: form.name.trim(),
       description: form.description.trim(),
@@ -182,16 +194,30 @@ export function PlansTab() {
               />
             </div>
           </div>
-          <div className="grid sm:grid-cols-2 gap-3">
-            <div>
-              <Label>Giá theo thời hạn (tháng:giá, cách nhau dấu phẩy; để trống = không bán)</Label>
-              <input
-                className={inputCls}
-                value={form.prices}
-                onChange={(e) => set("prices", e.target.value)}
-                placeholder="1:99000, 3:249000, 12:899000"
-              />
+          <div className="space-y-2">
+            <div className="grid sm:grid-cols-3 gap-3">
+              <div>
+                <Label>Giá 1 tháng (đ, để trống = không bán)</Label>
+                <input className={inputCls} type="number" min={0} step={1000} value={form.price1} onChange={(e) => set("price1", e.target.value)} placeholder="299000" />
+              </div>
+              <div>
+                <Label>Giảm giá khi mua 3 tháng (%)</Label>
+                <input className={inputCls} type="number" min={0} max={90} value={form.disc3} onChange={(e) => set("disc3", Number(e.target.value))} />
+              </div>
+              <div>
+                <Label>Giảm giá khi mua 1 năm (%)</Label>
+                <input className={inputCls} type="number" min={0} max={90} value={form.disc12} onChange={(e) => set("disc12", Number(e.target.value))} />
+              </div>
             </div>
+            <p className="text-xs text-zinc-400">
+              {buildPrices(Number(form.price1) || 0, Number(form.disc3) || 0, Number(form.disc12) || 0).length
+                ? buildPrices(Number(form.price1) || 0, Number(form.disc3) || 0, Number(form.disc12) || 0)
+                    .map((x) => `${x.months === 12 ? "1 năm" : `${x.months} tháng`}: ${vnd(x.price)}`)
+                    .join(" · ")
+                : "Gói không bán (cấp thủ công)."}
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-3">
             <div>
               <Label>Tên miền hệ thống gói được dùng (để trống = tất cả)</Label>
               <input
