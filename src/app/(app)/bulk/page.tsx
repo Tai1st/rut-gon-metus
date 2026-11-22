@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api, copyText } from "@/lib/api";
+import { shortUrl as shortUrlOf } from "@/lib/short";
 import type { LinkItem } from "@/lib/types";
 import { Badge, btnGhost, Card, ErrorBox, inputCls } from "@/components/ui";
 import { ModeToggle, type ShortenMode } from "@/components/ModeToggle";
@@ -55,7 +56,7 @@ export default function BulkPage() {
           method: "POST",
           body: { mode, url: list[i], ...(domain.trim() && { domain: domain.trim() }) },
         });
-        patch(i, { status: "ok", short: `https://${l.domain || window.location.host}/s/${l.code}`, title: l.title });
+        patch(i, { status: "ok", short: shortUrlOf(l, window.location.host), title: l.title });
       } catch (e) {
         const msg = e instanceof Error ? e.message : "Lỗi";
         patch(i, { status: "fail", error: msg });

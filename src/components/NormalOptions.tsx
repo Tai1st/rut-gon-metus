@@ -128,7 +128,7 @@ export function NormalOptions({
 }: {
   value: NormalOpts;
   onChange: (v: NormalOpts) => void;
-  /** Phần đầu của đường dẫn rút gọn hiển thị trước ô tên tùy chỉnh, ví dụ "link.metus.vn/s/". */
+  /** Phần đầu của đường dẫn rút gọn hiển thị trước ô tên tùy chỉnh, ví dụ "link.metus.vn/". */
   prefix: string;
   disabled?: boolean;
   /** Chế độ nhiều link: không dùng được tên tùy chỉnh. */

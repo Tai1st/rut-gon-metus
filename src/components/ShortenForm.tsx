@@ -207,7 +207,7 @@ export function ShortenForm({
               disabled={busy}
               multi={multi}
               domainField={domainField}
-              prefix={`${domain || (typeof window !== "undefined" ? window.location.host : "")}/s/`}
+              prefix={`${domain || (typeof window !== "undefined" ? window.location.host : "")}/`}
             />
           </div>
         ) : (

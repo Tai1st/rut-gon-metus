@@ -11,7 +11,9 @@ export async function unlockLink(code: string, formData: FormData) {
   const password = String(formData.get("password") ?? "");
   const h = await headers();
   const host = (h.get("x-forwarded-host") ?? h.get("host") ?? "").split(",")[0].trim();
-  const back = `/s/${encodeURIComponent(code)}`;
+  // Quay lại đúng địa chỉ người dùng đang xem: /<mã> (link thường) hoặc /s/<mã>. Chỉ nhận hai dạng này.
+  const asked = String(formData.get("next") ?? "");
+  const back = asked === `/${code}` ? `/${encodeURIComponent(code)}` : `/s/${encodeURIComponent(code)}`;
 
   const res = await beFetch(`/internal/links/${encodeURIComponent(code)}/unlock`, {
     method: "POST",
@@ -35,7 +37,7 @@ export async function unlockLink(code: string, formData: FormData) {
     httpOnly: true,
     secure: h.get("x-forwarded-proto") === "https",
     sameSite: "lax",
-    path: back,
+    path: "/", // tên cookie đã gắn theo mã nên dùng chung cho cả /<mã> và /s/<mã>
     maxAge: 60 * 60 * 12,
   });
   redirect(back);

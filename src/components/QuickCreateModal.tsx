@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { copyText } from "@/lib/api";
+import { shortUrl as shortUrlOf } from "@/lib/short";
 import type { LinkItem } from "@/lib/types";
 import { Badge, btnGhost, Modal } from "./ui";
 import { QrModal } from "./QrModal";
@@ -23,7 +24,7 @@ export function QuickCreateModal({ onClose }: { onClose: () => void }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  const shortUrl = (l: LinkItem) => `https://${l.domain || window.location.host}/s/${l.code}`;
+  const shortUrl = (l: LinkItem) => shortUrlOf(l, window.location.host);
 
   async function copyAll() {
     if (!created) return;

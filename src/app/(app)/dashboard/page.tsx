@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api, copyText, fmtDate } from "@/lib/api";
+import { shortUrl as shortUrlOf } from "@/lib/short";
 import { useMe } from "@/components/AppShell";
 import { QrModal } from "@/components/QrModal";
 import { PERIOD_VI, type Domain, type LinkItem, type Quota } from "@/lib/types";
@@ -85,7 +86,7 @@ export default function DashboardPage() {
     return () => window.removeEventListener("links:changed", onChanged);
   }, [load]);
 
-  const shortUrl = (l: LinkItem) => `https://${l.domain || window.location.host}/s/${l.code}`;
+  const shortUrl = (l: LinkItem) => shortUrlOf(l, window.location.host);
 
   const totals = useMemo(
     () => ({

@@ -8,8 +8,8 @@ export const dynamic = "force-dynamic";
 const BOT_UA = /facebookexternalhit|facebot|twitterbot|slackbot|whatsapp|telegrambot|linkedinbot|bot\b|crawler|spider|preview/i;
 
 /**
- * Trang trung gian của link thường dưới dạng HTML thuần. `src/proxy.ts` viết lại /s/<code> sang đây khi link dùng trang trung gian,
- * nên địa chỉ người dùng thấy vẫn là /s/<code>. Mọi điều kiện (mật khẩu, loại link) được kiểm tra lại ở đây
+ * Trang trung gian của link thường dưới dạng HTML thuần. `src/proxy.ts` viết lại /<code> (hoặc /s/<code>) sang đây khi link dùng trang trung gian,
+ * nên địa chỉ người dùng thấy không đổi. Mọi điều kiện (mật khẩu, loại link) được kiểm tra lại ở đây
  * để truy cập thẳng /r/<code> không vượt được cổng mật khẩu.
  */
 export async function GET(_req: Request, ctx: { params: Promise<{ code: string }> }) {
@@ -41,7 +41,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ code: string }
     title: link.title,
     description: link.description || `Đang chuyển hướng tới ${target.hostname}`,
     image: link.image,
-    pageUrl: `https://${host}/s/${link.code}`,
+    pageUrl: `https://${host}/${link.code}`,
     target: target.href,
     updatedTime: Math.floor(Date.now() / 1000),
   });

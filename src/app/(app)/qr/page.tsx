@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import QRCode from "qrcode";
 import { api, copyText } from "@/lib/api";
+import { shortUrl as shortUrlOf } from "@/lib/short";
 import type { LinkItem } from "@/lib/types";
 import { btnGhost, Card, ErrorBox, inputCls, Label } from "@/components/ui";
 
@@ -81,7 +82,7 @@ export default function QrPage() {
       });
   }, [text, fg, bg, size, margin, level, validColors]);
 
-  const shortUrl = (l: LinkItem) => `https://${l.domain || window.location.host}/s/${l.code}`;
+  const shortUrl = (l: LinkItem) => shortUrlOf(l, window.location.host);
 
   async function copyImage() {
     if (!src) return;
@@ -133,7 +134,7 @@ export default function QrPage() {
                   className={`${inputCls} h-24 resize-y`}
                   value={text}
                   onChange={(e) => setText(e.target.value)}
-                  placeholder="https://link.metus.vn/s/abc12345"
+                  placeholder="https://link.metus.vn/abc12345"
                 />
               </div>
               {links.length > 0 && (

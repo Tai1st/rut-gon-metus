@@ -69,7 +69,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return {
       title: { absolute: link.title },
       description,
-      openGraph: { title: link.title, description, type: "website", url: `https://${host}/s/${link.code}`, images },
+      openGraph: { title: link.title, description, type: "website", url: `https://${host}/${link.code}`, images },
       // Như trang mẫu: luôn dùng thẻ lớn (summary_large_image).
       twitter: { card: "summary_large_image", title: link.title, description, images },
     };
@@ -111,6 +111,7 @@ export default async function Page({ params, searchParams }: Props) {
       return (
         <div className="redir-page">
           <form action={unlockLink.bind(null, code)} className="redir-lock">
+          <input type="hidden" name="next" value={link.kind === "url" ? `/${code}` : `/s/${code}`} />
             <h1 className="redir-lock-title">Liên kết được bảo vệ</h1>
             <p className="redir-text">Nhập mật khẩu để tiếp tục.</p>
             <input name="password" type="password" required autoFocus autoComplete="off" maxLength={64} placeholder="Mật khẩu" className="redir-lock-input" />
