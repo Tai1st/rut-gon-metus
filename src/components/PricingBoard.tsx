@@ -75,6 +75,7 @@ export function PricingBoard({ plans, currentCode, freeDisabled, mode, loggedIn,
   const cycle = sel && cycles.includes(sel) ? sel : (cycles[0] ?? null);
   const bestSaving = (m: number) => Math.max(0, ...paid.map((p) => savingPct(p, m)));
 
+  const freeDeeplink = !freeDisabled && (free?.limit ?? 0) > 0;
   const freeIsCurrent = currentCode === "free" && !freeDisabled;
   const cols = Math.min(Math.max(paid.length, 1), 4);
 
@@ -194,11 +195,12 @@ export function PricingBoard({ plans, currentCode, freeDisabled, mode, loggedIn,
               </div>
             </div>
             <div className="space-y-2 text-zinc-300">
-              <div className="flex items-center gap-1.5">
-                <Yes /> Link sản phẩm và chiến dịch
+              {/* Hạn mức deeplink bằng 0 thì gói không có tính năng deeplink TikTok. */}
+              <div className={`flex items-center gap-1.5 ${freeDeeplink ? "" : "text-zinc-500"}`}>
+                {freeDeeplink ? <Yes /> : <No />} Link sản phẩm và chiến dịch
               </div>
-              <div className="flex items-center gap-1.5">
-                <Yes /> Link TikTok mở thẳng app
+              <div className={`flex items-center gap-1.5 ${freeDeeplink ? "" : "text-zinc-500"}`}>
+                {freeDeeplink ? <Yes /> : <No />} Link TikTok mở thẳng app
               </div>
             </div>
             <div className="space-y-2 text-zinc-300">
@@ -280,12 +282,8 @@ export function PricingBoard({ plans, currentCode, freeDisabled, mode, loggedIn,
                     </Row>
                     <Row label="Link rút gọn thường">Không giới hạn</Row>
                     <Row label="Tên miền riêng">{p.maxCustomDomains > 0 ? p.maxCustomDomains : <No />}</Row>
-                    <Row label="Link sản phẩm & chiến dịch">
-                      <Yes />
-                    </Row>
-                    <Row label="Link TikTok mở thẳng app">
-                      <Yes />
-                    </Row>
+                    <Row label="Link sản phẩm & chiến dịch">{p.limit > 0 ? <Yes /> : <No />}</Row>
+                    <Row label="Link TikTok mở thẳng app">{p.limit > 0 ? <Yes /> : <No />}</Row>
                     <Row label="Thanh toán QR, tự kích hoạt">
                       <Yes />
                     </Row>
