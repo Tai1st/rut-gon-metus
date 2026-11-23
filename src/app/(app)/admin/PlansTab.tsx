@@ -161,7 +161,7 @@ export function PlansTab() {
               <input
                 className={inputCls}
                 type="number"
-                min={1}
+                min={0}
                 value={form.limit}
                 onChange={(e) => set("limit", Number(e.target.value))}
               />
