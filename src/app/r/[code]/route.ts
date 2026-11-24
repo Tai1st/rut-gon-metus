@@ -2,6 +2,7 @@ import { cookies, headers } from "next/headers";
 import { beFetch } from "@/lib/be";
 import { INTERNAL_KEY } from "@/lib/config";
 import { isFacebookCrawler } from "@/lib/crawler";
+import { expiredResponse } from "@/lib/expired";
 import { isInterstitial, renderInterstitial, resolveTarget, unlockCookieName, type PublicLinkData } from "@/lib/interstitial";
 
 export const dynamic = "force-dynamic";
@@ -22,6 +23,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ code: string }
   const res = await beFetch(`/internal/links/${encodeURIComponent(code)}?host=${encodeURIComponent(host)}`, { internalKey: INTERNAL_KEY }).catch(() => null);
   if (!res || !res.ok) return notFound();
   const link = (await res.json()) as PublicLinkData;
+  if (link.expired) return expiredResponse();
   if (!isInterstitial(link, (await cookies()).get(unlockCookieName(code))?.value)) return notFound();
 
   const ua = h.get("user-agent") ?? "";

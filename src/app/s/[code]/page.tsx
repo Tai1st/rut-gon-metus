@@ -26,6 +26,7 @@ type PublicLink = {
   code: string;
   kind: "product" | "campaign" | "url";
   title: string;
+  expired?: boolean;
   description?: string;
   redirectType?: "direct" | "interstitial";
   image: string;
@@ -51,7 +52,9 @@ const loadLink = cache(async (code: string, host: string): Promise<PublicLink | 
     internalKey: INTERNAL_KEY,
   }).catch(() => null);
   if (!res || !res.ok) return null;
-  return (await res.json()) as PublicLink;
+  const link = (await res.json()) as PublicLink;
+  // Link Free quá hạn: proxy.ts đã trả trang nâng cấp; vào được tới đây (truy cập thẳng) thì coi như không có.
+  return link.expired ? null : link;
 });
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

@@ -12,6 +12,8 @@ export type PublicLinkData = {
   webUrl: string;
   hasPassword?: boolean;
   lockId?: string;
+  /** Link của gói Free đã quá hạn dùng: hiện trang nâng cấp thay vì chuyển hướng. */
+  expired?: boolean;
   /** Có khi link thường trỏ tới deeplink của hệ thống: dữ liệu App Links để khai báo thẻ al:*. */
   appLinks?: { androidUrl: string; iosUrl: string; webUrl: string };
 } & Omit<RedirectRules, "webUrl">;

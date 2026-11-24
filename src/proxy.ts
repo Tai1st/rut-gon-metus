@@ -3,6 +3,7 @@ import { beFetch } from "@/lib/be";
 import { INTERNAL_KEY, isLinkOnlyHost } from "@/lib/config";
 import { isInterstitial, unlockCookieName, type PublicLinkData } from "@/lib/interstitial";
 import { isReservedCode } from "@/lib/reserved";
+import { expiredResponse } from "@/lib/expired";
 
 /**
  * Định tuyến đường dẫn rút gọn:
@@ -40,6 +41,7 @@ export async function proxy(req: NextRequest) {
   if (!res || !res.ok) return NextResponse.next(); // /s/<mã> tự hiện 404; /<mã> không có trang nào khớp nên cũng 404
 
   const link = (await res.json()) as PublicLinkData;
+  if (link.expired) return expiredResponse();
   if (isInterstitial(link, req.cookies.get(unlockCookieName(code))?.value)) {
     return NextResponse.rewrite(new URL(`/r/${encodeURIComponent(code)}`, req.url));
   }

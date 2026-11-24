@@ -25,6 +25,8 @@ export type LinkItem = {
   domain: string;
   clicks: number;
   createdAt: string;
+  /** Hạn dùng của link gói Free (null = không hết hạn). */
+  expiresAt?: string | null;
   archivedAt: string | null;
 };
 
