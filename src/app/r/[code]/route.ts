@@ -3,7 +3,7 @@ import { beFetch } from "@/lib/be";
 import { INTERNAL_KEY } from "@/lib/config";
 import { isFacebookCrawler } from "@/lib/crawler";
 import { expiredResponse } from "@/lib/expired";
-import { isInterstitial, renderInterstitial, renderShopeeEvoke, resolveTarget, safeHttpUrl, unlockCookieName, type PublicLinkData } from "@/lib/interstitial";
+import { isInterstitial, renderInterstitial, resolveTarget, shopeeRedirectTarget, unlockCookieName, type PublicLinkData } from "@/lib/interstitial";
 
 export const dynamic = "force-dynamic";
 
@@ -28,23 +28,15 @@ export async function GET(_req: Request, ctx: { params: Promise<{ code: string }
 
   const ua = h.get("user-agent") ?? "";
 
-  // Deeplink Shopee: trang gọi app Shopee bằng JavaScript (logic riêng, không dùng thẻ al:* và quy tắc chuyển hướng của link thường).
+  // Deeplink Shopee: chuyển 301 thẳng sang link Shopee gốc cho mọi User-Agent (giống cách các dịch vụ rút gọn Shopee khác);
+  // Shopee tự lo phần mở app. Chỉ đếm lượt bấm, bot quét link không được tính.
   if (link.kind === "shopee") {
-    if (!link.androidUrl || !safeHttpUrl(link.webUrl)) return notFound();
+    const to = shopeeRedirectTarget(link);
+    if (!to) return notFound();
     if (!BOT_UA.test(ua)) {
       void beFetch(`/internal/links/${encodeURIComponent(code)}?count=1&host=${encodeURIComponent(host)}`, { internalKey: INTERNAL_KEY }).catch(() => null);
     }
-    return new Response(
-      renderShopeeEvoke({
-        title: link.title,
-        description: link.description || "Xem trên Shopee",
-        image: link.image,
-        pageUrl: `https://${host}/${link.code}`,
-        webUrl: link.webUrl,
-        deeplink: link.androidUrl,
-      }),
-      { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store, max-age=0", vary: "User-Agent" } },
-    );
+    return new Response(null, { status: 301, headers: { location: to, "cache-control": "no-store, no-cache, must-revalidate" } });
   }
 
   const target = resolveTarget(link, {
