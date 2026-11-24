@@ -1,6 +1,6 @@
 "use client";
 
-import { Link2 } from "lucide-react";
+import { Link2, ShoppingBag } from "lucide-react";
 
 /** Logo TikTok (lucide không có biểu tượng thương hiệu nên vẽ trực tiếp bằng SVG). */
 function TikTokIcon({ className }: { className?: string }) {
@@ -11,11 +11,12 @@ function TikTokIcon({ className }: { className?: string }) {
   );
 }
 
-export type ShortenMode = "deeplink" | "normal";
+export type ShortenMode = "deeplink" | "normal" | "shopee";
 
 export const MODE_PLACEHOLDER: Record<ShortenMode, string> = {
   deeplink: "Dán link TikTok Shop (vt.tiktok.com/… hoặc link sản phẩm, chiến dịch)",
   normal: "Dán đường dẫn bất kỳ (https://…)",
+  shopee: "Dán link Shopee (s.shopee.vn/… hoặc link sản phẩm shopee.vn)",
 };
 
 /** Chọn loại rút gọn: Deeplink TikTok Shop (mở thẳng app) hoặc Link thường (chuyển hướng tới trang bất kỳ). */
@@ -37,6 +38,17 @@ export function ModeToggle({
       active: "border-tiktok-cyan bg-tiktok-cyan/10",
     },
     {
+      key: "shopee",
+      title: "Deeplink Shopee",
+      note: "Mở thẳng ứng dụng Shopee",
+      icon: (
+        <span className="w-[28px] h-[28px] rounded-lg bg-orange-500 flex items-center justify-center shrink-0">
+          <ShoppingBag className="w-4 h-4 text-white" />
+        </span>
+      ),
+      active: "border-orange-500 bg-orange-500/10",
+    },
+    {
       key: "deeplink",
       title: "Deeplink TikTok Shop",
       note: "Mở thẳng ứng dụng TikTok",
@@ -49,7 +61,7 @@ export function ModeToggle({
     },
   ];
   return (
-    <div className="grid grid-cols-2 gap-2.5" role="radiogroup" aria-label="Loại rút gọn">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5" role="radiogroup" aria-label="Loại rút gọn">
       {opts.map((o) => (
         <button
           key={o.key}

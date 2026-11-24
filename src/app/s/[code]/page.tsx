@@ -53,6 +53,8 @@ const loadLink = cache(async (code: string, host: string): Promise<PublicLink | 
   }).catch(() => null);
   if (!res || !res.ok) return null;
   const link = (await res.json()) as PublicLink;
+  // Deeplink Shopee do /r/<mã> phục vụ (proxy.ts viết lại); vào được tới đây thì coi như không có trang.
+  if ((link.kind as string) === "shopee") return null;
   // Link Free quá hạn: proxy.ts đã trả trang nâng cấp; vào được tới đây (truy cập thẳng) thì coi như không có.
   return link.expired ? null : link;
 });

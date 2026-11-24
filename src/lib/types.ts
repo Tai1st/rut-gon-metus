@@ -8,7 +8,7 @@ export type UrlParam = { key: string; value: string };
 export type LinkItem = {
   id: string;
   code: string;
-  kind: "product" | "campaign" | "url";
+  kind: "product" | "campaign" | "url" | "shopee";
   title: string;
   description?: string;
   redirectType?: "direct" | "interstitial";
@@ -51,6 +51,8 @@ export type Quota = {
   remaining: number | null;
   /** Gói free đã bị admin tắt và người dùng chưa có gói trả phí còn hạn: không tạo được link mới. */
   disabled?: boolean;
+  /** Hạn mức deeplink Shopee (tính riêng với deeplink TikTok). */
+  shopee?: { limit: number | null; used: number; remaining: number | null };
 };
 
 export type PricePoint = { months: number; price: number };
@@ -66,6 +68,8 @@ export type Plan = {
   currency: string;
   systemDomains: string[];
   maxCustomDomains: number;
+  /** Số deeplink Shopee mỗi chu kỳ (0 = không có). */
+  shopeeLimit?: number;
   isActive: boolean;
   isRecommended?: boolean;
   /** % giảm khi mua 3 tháng / 1 năm; giá các kỳ này do hệ thống tự tính từ giá 1 tháng. */

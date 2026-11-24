@@ -13,6 +13,7 @@ export type BoardPlan = {
   period: "day" | "week" | "month";
   prices: { months: number; price: number }[];
   maxCustomDomains: number;
+  shopeeLimit?: number;
   isRecommended?: boolean;
 };
 
@@ -193,6 +194,10 @@ export function PricingBoard({ plans, currentCode, freeDisabled, mode, loggedIn,
                 <span className="text-zinc-400">deeplink TikTok / {PERIOD_VI[free.period]}</span>
               </div>
               <div>
+                <strong className="text-white">{freeDisabled ? 0 : (free.shopeeLimit ?? 0)}</strong>{" "}
+                <span className="text-zinc-400">deeplink Shopee / {PERIOD_VI[free.period]}</span>
+              </div>
+              <div>
                 <strong className="text-white">{free.maxCustomDomains > 0 ? free.maxCustomDomains : "—"}</strong>{" "}
                 <span className="text-zinc-400">tên miền riêng</span>
               </div>
@@ -287,6 +292,7 @@ export function PricingBoard({ plans, currentCode, freeDisabled, mode, loggedIn,
                     <Row label="Deeplink TikTok Shop">
                       {p.limit}/{PERIOD_VI[p.period]}
                     </Row>
+                    <Row label="Deeplink Shopee">{(p.shopeeLimit ?? 0) > 0 ? `${p.shopeeLimit}/${PERIOD_VI[p.period]}` : <No />}</Row>
                     <Row label="Link rút gọn thường">Không giới hạn</Row>
                     <Row label="Thời hạn link">Không giới hạn</Row>
                     <Row label="Tên miền riêng">{p.maxCustomDomains > 0 ? p.maxCustomDomains : <No />}</Row>

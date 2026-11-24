@@ -16,6 +16,7 @@ const EMPTY = {
   disc12: 24,
   systemDomains: "",
   maxCustomDomains: 0,
+  shopeeLimit: 0,
   isActive: true,
   isRecommended: false,
 };
@@ -63,6 +64,7 @@ export function PlansTab() {
       disc12: p.discount12 ?? 24,
       systemDomains: p.systemDomains.join(", "),
       maxCustomDomains: p.maxCustomDomains,
+      shopeeLimit: p.shopeeLimit ?? 0,
       isActive: p.isActive,
       isRecommended: !!p.isRecommended,
     });
@@ -100,6 +102,7 @@ export function PlansTab() {
         .map((s) => s.trim().toLowerCase())
         .filter(Boolean),
       maxCustomDomains: Number(form.maxCustomDomains),
+      shopeeLimit: Number(form.shopeeLimit) || 0,
       isActive: form.isActive,
       isRecommended: form.isRecommended,
     };
@@ -188,6 +191,16 @@ export function PlansTab() {
                 onChange={(e) => set("maxCustomDomains", Number(e.target.value))}
               />
             </div>
+            <div>
+              <Label>Số deeplink Shopee mỗi chu kỳ (0 = không)</Label>
+              <input
+                className={inputCls}
+                type="number"
+                min={0}
+                value={form.shopeeLimit}
+                onChange={(e) => set("shopeeLimit", Number(e.target.value))}
+              />
+            </div>
           </div>
           <div className="space-y-2">
             <div className="grid sm:grid-cols-3 gap-3">
@@ -258,7 +271,7 @@ export function PlansTab() {
                   {!p.isActive && <Badge tone="gray">Ngừng bán</Badge>}
                 </div>
                 <p className="text-xs text-slate-300">
-                  {p.limit} deeplink/{PERIOD_VI[p.period]} · domain riêng: {p.maxCustomDomains || "không"} ·{" "}
+                  {p.limit} deeplink/{PERIOD_VI[p.period]} · Shopee: {p.shopeeLimit ?? 0} · domain riêng: {p.maxCustomDomains || "không"} ·{" "}
                   {p.systemDomains.length ? `domain: ${p.systemDomains.join(", ")}` : "mọi domain hệ thống"}
                 </p>
                 <p className="text-xs text-slate-500">

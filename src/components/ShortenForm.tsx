@@ -33,12 +33,15 @@ export function parseLines(text: string) {
 export function ShortenForm({
   onCreated,
   deeplinkBlocked,
+  shopeeBlocked,
   autoFocus,
 }: {
   /** Gọi sau mỗi lần tạo xong với danh sách link tạo thành công. */
   onCreated: (links: LinkItem[]) => void;
   /** Hết hạn mức deeplink: chặn nút Rút gọn ở chế độ deeplink. */
   deeplinkBlocked?: boolean;
+  /** Hết hạn mức deeplink Shopee (hoặc gói không có): chặn nút Rút gọn ở chế độ Shopee. */
+  shopeeBlocked?: boolean;
   autoFocus?: boolean;
 }) {
   const [mode, setMode] = useState<ShortenMode>("normal");
@@ -67,7 +70,7 @@ export function ShortenForm({
   }, [autoFocus, multi]);
 
   const lines = multi ? parseLines(url) : url.trim() ? [url.trim()] : [];
-  const blocked = mode === "deeplink" && !!deeplinkBlocked;
+  const blocked = (mode === "deeplink" && !!deeplinkBlocked) || (mode === "shopee" && !!shopeeBlocked);
   // Link thường + link TikTok: hệ thống tự tạo deeplink trước rồi rút gọn link thường trỏ tới deeplink đó.
   const hasTikTok = mode === "normal" && autoDeeplink && lines.some((l) => /^https:\/\/([a-z0-9-]+\.)*tiktok\.com(\/|$)/i.test(l));
 
@@ -97,7 +100,7 @@ export function ShortenForm({
           body: {
             mode,
             url: list[i],
-            ...(mode === "deeplink" ? !multi && title.trim() && { title: title.trim() } : { ...normalBody(opts, { multi }), autoDeeplink }),
+            ...(mode !== "normal" ? !multi && title.trim() && { title: title.trim() } : { ...normalBody(opts, { multi }), autoDeeplink }),
             ...(domain && { domain }),
           },
         });

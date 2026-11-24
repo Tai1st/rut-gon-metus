@@ -141,6 +141,7 @@ export default function DashboardPage() {
 
   const isFree = quota?.plan.code === "free";
   const exhausted = quota?.remaining === 0;
+  const shopeeBlocked = quota?.shopee?.remaining === 0;
   const unlimited = quota?.limit === null;
 
   return (
@@ -180,7 +181,9 @@ export default function DashboardPage() {
                 ? "Gói miễn phí đã tắt"
                 : unlimited
                   ? "Không giới hạn"
-                  : `Trên ${quota.limit} deeplink/${PERIOD_VI[quota.period]}`
+                  : `Trên ${quota.limit} deeplink/${PERIOD_VI[quota.period]}${
+                      quota.shopee ? ` · Shopee: ${quota.shopee.remaining === null ? "∞" : `còn ${quota.shopee.remaining}`}` : ""
+                    }`
               : "Đang tải…"
           }
           noteCls={exhausted ? "text-red-400" : "text-zinc-500"}
@@ -201,7 +204,7 @@ export default function DashboardPage() {
           <span className="text-tiktok-pink">⚡</span>
           Tạo nhanh liên kết rút gọn
         </h3>
-        <ShortenForm onCreated={onCreated} deeplinkBlocked={exhausted} />
+        <ShortenForm onCreated={onCreated} deeplinkBlocked={exhausted} shopeeBlocked={shopeeBlocked} />
         <div className="mt-3 space-y-2">
           <ErrorBox message={error} />
           {quota?.disabled ? (
@@ -220,7 +223,12 @@ export default function DashboardPage() {
               (link thường vẫn tạo được không giới hạn).
             </p>
           ) : (
-            <p className="text-xs text-zinc-500">Link rút gọn thường không giới hạn số lượng; chỉ deeplink TikTok tính vào hạn mức của gói.</p>
+            <p className="text-xs text-zinc-500">
+              Link rút gọn thường không giới hạn số lượng; deeplink TikTok và deeplink Shopee tính vào hạn mức của gói (mỗi loại tính riêng).
+              {shopeeBlocked && (
+                <span className="text-amber-400"> Gói hiện tại không có hoặc đã hết hạn mức deeplink Shopee.</span>
+              )}
+            </p>
           )}
         </div>
       </div>
@@ -263,6 +271,7 @@ export default function DashboardPage() {
               <option value="product">Sản phẩm</option>
               <option value="campaign">Chiến dịch</option>
               <option value="url">Link thường</option>
+              <option value="shopee">Shopee</option>
             </select>
           </div>
         </div>
@@ -287,8 +296,8 @@ export default function DashboardPage() {
                 <div className="space-y-1 overflow-hidden min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-mono font-bold text-sm sm:text-base text-tiktok-cyan truncate">{shortUrl(l)}</span>
-                    <Badge tone={l.kind === "campaign" ? "amber" : l.kind === "url" ? "blue" : "pink"}>
-                      {l.kind === "campaign" ? "Chiến dịch" : l.kind === "url" ? "Link thường" : "Sản phẩm"}
+                    <Badge tone={l.kind === "campaign" || l.kind === "shopee" ? "amber" : l.kind === "url" ? "blue" : "pink"}>
+                      {l.kind === "campaign" ? "Chiến dịch" : l.kind === "url" ? "Link thường" : l.kind === "shopee" ? "Shopee" : "Sản phẩm"}
                     </Badge>
                     <span className="text-[11px] text-zinc-500">• {l.clicks} lượt bấm</span>
                   </div>
