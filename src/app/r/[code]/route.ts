@@ -31,14 +31,14 @@ export async function GET(_req: Request, ctx: { params: Promise<{ code: string }
   // Deeplink Shopee: chuyển 301 thẳng sang link Shopee gốc cho mọi User-Agent (giống cách các dịch vụ rút gọn Shopee khác);
   // Shopee tự lo phần mở app. Chỉ đếm lượt bấm, bot quét link không được tính.
   if (link.kind === "shopee") {
-    // Chỉ lượt đến từ Facebook (bot, trình duyệt trong app, Referer) nhận link affiliate gốc; còn lại nhận địa chỉ sản phẩm sạch, không có ID hoa hồng.
+    // Chỉ lượt đến từ Facebook (bot, trình duyệt trong app, nhận biết bằng User-Agent) nhận link affiliate gốc; còn lại nhận địa chỉ sản phẩm sạch, không có ID hoa hồng.
     const full = shopeeRedirectTarget(link);
-    const to = isFromFacebook(ua, h.get("referer")) ? full : (shopeeCleanTarget(link) ?? full);
+    const to = isFromFacebook(ua) ? full : (shopeeCleanTarget(link) ?? full);
     if (!to) return notFound();
     if (!BOT_UA.test(ua)) {
       void beFetch(`/internal/links/${encodeURIComponent(code)}?count=1&host=${encodeURIComponent(host)}`, { internalKey: INTERNAL_KEY }).catch(() => null);
     }
-    return new Response(null, { status: 301, headers: { location: to, "cache-control": "no-store, no-cache, must-revalidate", vary: "User-Agent, Referer" } });
+    return new Response(null, { status: 301, headers: { location: to, "cache-control": "no-store, no-cache, must-revalidate", vary: "User-Agent" } });
   }
 
   // Deeplink TikTok: HTML thuần, chọn bản theo User-Agent (bot Facebook/Telegram, di động, còn lại). Chỉ đếm lượt bấm của người thật.
