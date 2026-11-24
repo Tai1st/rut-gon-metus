@@ -24,9 +24,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   // Hạn mức chỉ để hiển thị ở thanh bên; lỗi thì bỏ qua, không chặn trang.
   const quota = quotaRes?.ok ? ((await quotaRes.json().catch(() => null)) as Quota | null) : null;
 
-  // Link hết hạn chưa có tính năng ở backend nên luôn là 0.
+  // Số link của gói Free đã quá hạn dùng (backend trả sẵn trong /links/counts).
   const raw = countsRes?.ok ? ((await countsRes.json().catch(() => null)) as Partial<Counts> | null) : null;
-  const counts: Counts = { active: raw?.active ?? 0, archived: raw?.archived ?? 0, expired: 0 };
+  const counts: Counts = { active: raw?.active ?? 0, archived: raw?.archived ?? 0, expired: raw?.expired ?? 0 };
 
   return (
     <AppShell me={me} quota={quota} counts={counts}>
