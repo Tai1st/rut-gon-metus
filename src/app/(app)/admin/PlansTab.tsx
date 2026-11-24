@@ -1,5 +1,6 @@
 "use client";
 
+import { SHOPEE_UI } from "@/lib/features";
 import { useCallback, useEffect, useState } from "react";
 import { api, vnd } from "@/lib/api";
 import { PERIOD_VI, type Plan, type PricePoint } from "@/lib/types";
@@ -191,6 +192,7 @@ export function PlansTab() {
                 onChange={(e) => set("maxCustomDomains", Number(e.target.value))}
               />
             </div>
+            {SHOPEE_UI && (
             <div>
               <Label>Số deeplink Shopee mỗi chu kỳ (0 = không)</Label>
               <input
@@ -201,6 +203,7 @@ export function PlansTab() {
                 onChange={(e) => set("shopeeLimit", Number(e.target.value))}
               />
             </div>
+            )}
           </div>
           <div className="space-y-2">
             <div className="grid sm:grid-cols-3 gap-3">
@@ -271,7 +274,7 @@ export function PlansTab() {
                   {!p.isActive && <Badge tone="gray">Ngừng bán</Badge>}
                 </div>
                 <p className="text-xs text-slate-300">
-                  {p.limit} deeplink/{PERIOD_VI[p.period]} · Shopee: {p.shopeeLimit ?? 0} · domain riêng: {p.maxCustomDomains || "không"} ·{" "}
+                  {p.limit} deeplink/{PERIOD_VI[p.period]}{SHOPEE_UI ? ` · Shopee: ${p.shopeeLimit ?? 0}` : ""} · domain riêng: {p.maxCustomDomains || "không"} ·{" "}
                   {p.systemDomains.length ? `domain: ${p.systemDomains.join(", ")}` : "mọi domain hệ thống"}
                 </p>
                 <p className="text-xs text-slate-500">

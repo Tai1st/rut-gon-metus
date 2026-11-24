@@ -10,6 +10,7 @@ import { QrModal } from "@/components/QrModal";
 import { PERIOD_VI, type Domain, type LinkItem, type Quota } from "@/lib/types";
 import { Badge, btnGhost, btnPrimary, ErrorBox, inputCls, Modal } from "@/components/ui";
 import { ShortenForm } from "@/components/ShortenForm";
+import { SHOPEE_UI } from "@/lib/features";
 import { cleanRules, EMPTY_NORMAL, NormalOptions, type NormalOpts } from "@/components/NormalOptions";
 
 type Available = { system: Domain[]; custom: Domain[] };
@@ -182,7 +183,7 @@ export default function DashboardPage() {
                 : unlimited
                   ? "Không giới hạn"
                   : `Trên ${quota.limit} deeplink/${PERIOD_VI[quota.period]}${
-                      quota.shopee ? ` · Shopee: ${quota.shopee.remaining === null ? "∞" : `còn ${quota.shopee.remaining}`}` : ""
+                      SHOPEE_UI && quota.shopee ? ` · Shopee: ${quota.shopee.remaining === null ? "∞" : `còn ${quota.shopee.remaining}`}` : ""
                     }`
               : "Đang tải…"
           }
@@ -224,8 +225,10 @@ export default function DashboardPage() {
             </p>
           ) : (
             <p className="text-xs text-zinc-500">
-              Link rút gọn thường không giới hạn số lượng; deeplink TikTok và deeplink Shopee tính vào hạn mức của gói (mỗi loại tính riêng).
-              {shopeeBlocked && (
+              {SHOPEE_UI
+                ? "Link rút gọn thường không giới hạn số lượng; deeplink TikTok và deeplink Shopee tính vào hạn mức của gói (mỗi loại tính riêng)."
+                : "Link rút gọn thường không giới hạn số lượng; chỉ deeplink TikTok tính vào hạn mức của gói."}
+              {SHOPEE_UI && shopeeBlocked && (
                 <span className="text-amber-400"> Gói hiện tại không có hoặc đã hết hạn mức deeplink Shopee.</span>
               )}
             </p>
@@ -271,7 +274,7 @@ export default function DashboardPage() {
               <option value="product">Sản phẩm</option>
               <option value="campaign">Chiến dịch</option>
               <option value="url">Link thường</option>
-              <option value="shopee">Shopee</option>
+              {SHOPEE_UI && <option value="shopee">Shopee</option>}
             </select>
           </div>
         </div>

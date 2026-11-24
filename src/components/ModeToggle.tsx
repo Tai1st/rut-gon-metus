@@ -1,6 +1,7 @@
 "use client";
 
 import { Link2, ShoppingBag } from "lucide-react";
+import { SHOPEE_UI } from "@/lib/features";
 
 /** Logo TikTok (lucide không có biểu tượng thương hiệu nên vẽ trực tiếp bằng SVG). */
 function TikTokIcon({ className }: { className?: string }) {
@@ -37,8 +38,8 @@ export function ModeToggle({
       icon: <Link2 className="w-4 h-4 text-tiktok-cyan shrink-0" />,
       active: "border-tiktok-cyan bg-tiktok-cyan/10",
     },
-    {
-      key: "shopee",
+    ...(SHOPEE_UI ? [{
+      key: "shopee" as const,
       title: "Deeplink Shopee",
       note: "Mở thẳng ứng dụng Shopee",
       icon: (
@@ -47,7 +48,7 @@ export function ModeToggle({
         </span>
       ),
       active: "border-orange-500 bg-orange-500/10",
-    },
+    }] : []),
     {
       key: "deeplink",
       title: "Deeplink TikTok Shop",
@@ -61,7 +62,7 @@ export function ModeToggle({
     },
   ];
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5" role="radiogroup" aria-label="Loại rút gọn">
+    <div className={`grid grid-cols-1 ${SHOPEE_UI ? "sm:grid-cols-3" : "sm:grid-cols-2"} gap-2.5`} role="radiogroup" aria-label="Loại rút gọn">
       {opts.map((o) => (
         <button
           key={o.key}
