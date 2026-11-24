@@ -21,19 +21,22 @@ export function renderExpiredPage(): string {
 <style>
   *{box-sizing:border-box}
   body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:#0b0b10;color:#f4f4f5;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-  .card{max-width:440px;width:100%;text-align:center;background:#141419;border:1px solid #27272a;border-radius:24px;padding:36px 28px;position:relative;overflow:hidden}
-  .card:before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#25f4ee,#fe2c55,#25f4ee)}
-  .icon{width:64px;height:64px;margin:0 auto 18px;border-radius:18px;background:rgba(254,44,85,.15);color:#fe2c55;display:flex;align-items:center;justify-content:center;font-size:32px}
-  h1{margin:0 0 10px;font-size:22px;font-weight:800}
+  .card{max-width:460px;width:100%;text-align:center;background:#141419;border:2px solid #ef4444;border-radius:24px;padding:36px 28px;position:relative;overflow:hidden;box-shadow:0 0 0 4px rgba(239,68,68,.12),0 20px 60px rgba(239,68,68,.18)}
+  .card:before{content:"";position:absolute;top:0;left:0;right:0;height:6px;background:#ef4444}
+  .icon{width:68px;height:68px;margin:0 auto 18px;border-radius:50%;background:#ef4444;color:#fff;display:flex;align-items:center;justify-content:center;font-size:38px;font-weight:900;line-height:1}
+  h1{margin:0 0 14px;font-size:26px;font-weight:900;color:#ef4444;letter-spacing:.2px}
+  .alert{margin:0 0 18px;padding:14px 16px;border-radius:14px;background:rgba(239,68,68,.14);border:1px solid rgba(239,68,68,.55);color:#fca5a5;font-size:17px;font-weight:800;line-height:1.45}
   p{margin:0 0 22px;font-size:14px;line-height:1.6;color:#a1a1aa}
-  a.btn{display:inline-block;padding:12px 26px;border-radius:14px;background:linear-gradient(135deg,#fe2c55,#25f4ee);color:#fff;font-weight:800;font-size:15px;text-decoration:none}
+  a.btn{display:inline-block;padding:13px 30px;border-radius:14px;background:#ef4444;color:#fff;font-weight:900;font-size:16px;text-decoration:none;box-shadow:0 8px 24px rgba(239,68,68,.35)}
+  a.btn:hover{background:#dc2626}
   small{display:block;margin-top:18px;font-size:12px;color:#71717a}
 </style>
 </head>
 <body>
   <div class="card">
-    <div class="icon">&#9203;</div>
+    <div class="icon">!</div>
     <h1>Link đã hết hạn</h1>
+    <div class="alert">Vui lòng nâng cấp gói để tiếp tục sử dụng link này.</div>
     <p>Link này được tạo bằng gói Miễn phí và đã hết thời hạn sử dụng. Nếu bạn là chủ sở hữu, hãy nâng cấp gói để kích hoạt lại link và tạo link không giới hạn thời gian.</p>
     <a class="btn" href="${url}">Nâng cấp gói</a>
     <small>Nếu bạn nhận link này từ người khác, hãy liên hệ họ để được link mới.</small>

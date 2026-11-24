@@ -64,6 +64,9 @@ function Row({ label, children }: { label: string; children: ReactNode }) {
     </div>
   );
 }
+/** Link tạo bằng gói Free hết hạn sau số ngày này (khớp LINKS_FREE_LINK_DAYS của backend, mặc định 3). */
+const FREE_LINK_DAYS = 3;
+
 const Yes = () => <Check className="w-4 h-4 text-emerald-400 inline" />;
 const No = () => <X className="w-4 h-4 text-red-400 inline" />;
 
@@ -193,6 +196,10 @@ export function PricingBoard({ plans, currentCode, freeDisabled, mode, loggedIn,
                 <strong className="text-white">{free.maxCustomDomains > 0 ? free.maxCustomDomains : "—"}</strong>{" "}
                 <span className="text-zinc-400">tên miền riêng</span>
               </div>
+              <div>
+                <strong className="text-white">{FREE_LINK_DAYS} ngày</strong>{" "}
+                <span className="text-zinc-400">thời hạn mỗi link</span>
+              </div>
             </div>
             <div className="space-y-2 text-zinc-300">
               {/* Hạn mức deeplink bằng 0 thì gói không có tính năng deeplink TikTok. */}
@@ -281,6 +288,7 @@ export function PricingBoard({ plans, currentCode, freeDisabled, mode, loggedIn,
                       {p.limit}/{PERIOD_VI[p.period]}
                     </Row>
                     <Row label="Link rút gọn thường">Không giới hạn</Row>
+                    <Row label="Thời hạn link">Không giới hạn</Row>
                     <Row label="Tên miền riêng">{p.maxCustomDomains > 0 ? p.maxCustomDomains : <No />}</Row>
                     <Row label="Link sản phẩm & chiến dịch">{p.limit > 0 ? <Yes /> : <No />}</Row>
                     <Row label="Link TikTok mở thẳng app">{p.limit > 0 ? <Yes /> : <No />}</Row>

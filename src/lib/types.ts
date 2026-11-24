@@ -27,6 +27,8 @@ export type LinkItem = {
   createdAt: string;
   /** Hạn dùng của link gói Free (null = không hết hạn). */
   expiresAt?: string | null;
+  /** Link của gói Free đã quá hạn dùng. */
+  expired?: boolean;
   archivedAt: string | null;
 };
 

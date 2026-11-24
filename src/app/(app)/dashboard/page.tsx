@@ -139,6 +139,7 @@ export default function DashboardPage() {
     }
   }
 
+  const isFree = quota?.plan.code === "free";
   const exhausted = quota?.remaining === 0;
   const unlimited = quota?.limit === null;
 
@@ -279,7 +280,9 @@ export default function DashboardPage() {
             {visible.map((l) => (
               <div
                 key={l.id}
-                className="bg-[#141419] border border-zinc-800 rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 hover:border-zinc-700 transition-colors"
+                className={`bg-[#141419] border rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 transition-colors ${
+                  l.expired ? "border-red-500/60 hover:border-red-500" : "border-zinc-800 hover:border-zinc-700"
+                }`}
               >
                 <div className="space-y-1 overflow-hidden min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
@@ -293,7 +296,16 @@ export default function DashboardPage() {
                   <div className="text-[10px] text-zinc-500">
                     Tạo: {fmtDate(l.createdAt)}
                     {l.archivedAt && ` • Lưu trữ: ${fmtDate(l.archivedAt)}`}
+                    {!l.expired && l.expiresAt && ` • Hết hạn: ${fmtDate(l.expiresAt)}`}
                   </div>
+                  {l.expired && (
+                    <div className="text-xs sm:text-sm font-extrabold text-red-500">
+                      Link dùng thử đã hết hạn, vui lòng{" "}
+                      <Link href="/plans" className="underline underline-offset-2 hover:text-red-400">
+                        nâng cấp gói
+                      </Link>
+                    </div>
+                  )}
                 </div>
                 <div className="flex flex-wrap items-center gap-1.5 shrink-0">
                   {tab === "active" ? (
@@ -330,9 +342,12 @@ export default function DashboardPage() {
                       Khôi phục
                     </button>
                   )}
+                  {/* Gói Free không xóa được link: nút bị vô hiệu hóa, nâng cấp gói để xóa. */}
                   <button
                     onClick={() => remove(l)}
-                    className="px-2.5 py-1.5 rounded-lg bg-zinc-800 text-zinc-400 hover:text-red-400 text-xs font-semibold transition-colors"
+                    disabled={isFree}
+                    title={isFree ? "Gói Miễn phí không xóa được link, hãy nâng cấp gói" : undefined}
+                    className="px-2.5 py-1.5 rounded-lg bg-zinc-800 text-zinc-400 hover:text-red-400 text-xs font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:text-zinc-400"
                   >
                     Xóa
                   </button>
