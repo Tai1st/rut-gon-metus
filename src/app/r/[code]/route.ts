@@ -1,9 +1,9 @@
 import { cookies, headers } from "next/headers";
 import { beFetch } from "@/lib/be";
 import { INTERNAL_KEY } from "@/lib/config";
-import { isFacebookCrawler } from "@/lib/crawler";
+import { isAlBot, isFacebookCrawler, isMobileUa } from "@/lib/crawler";
 import { expiredResponse } from "@/lib/expired";
-import { isInterstitial, renderInterstitial, resolveTarget, shopeeRedirectTarget, unlockCookieName, type PublicLinkData } from "@/lib/interstitial";
+import { isInterstitial, renderDeeplinkPage, renderInterstitial, resolveTarget, safeHttpUrl, shopeeRedirectTarget, unlockCookieName, type PublicLinkData } from "@/lib/interstitial";
 
 export const dynamic = "force-dynamic";
 
@@ -37,6 +37,19 @@ export async function GET(_req: Request, ctx: { params: Promise<{ code: string }
       void beFetch(`/internal/links/${encodeURIComponent(code)}?count=1&host=${encodeURIComponent(host)}`, { internalKey: INTERNAL_KEY }).catch(() => null);
     }
     return new Response(null, { status: 301, headers: { location: to, "cache-control": "no-store, no-cache, must-revalidate" } });
+  }
+
+  // Deeplink TikTok: HTML thuần, chọn bản theo User-Agent (bot Facebook/Telegram, di động, còn lại). Chỉ đếm lượt bấm của người thật.
+  if (link.kind === "product" || link.kind === "campaign") {
+    if (!safeHttpUrl(link.webUrl) || !link.androidUrl) return notFound();
+    if (!BOT_UA.test(ua)) {
+      void beFetch(`/internal/links/${encodeURIComponent(code)}?count=1&host=${encodeURIComponent(host)}`, { internalKey: INTERNAL_KEY }).catch(() => null);
+    }
+    const variant = isAlBot(ua) ? "bot" : isMobileUa(ua) ? "mobile" : "desktop";
+    return new Response(
+      renderDeeplinkPage(variant, { title: link.title, image: link.image, webUrl: link.webUrl, androidUrl: link.androidUrl, iosUrl: link.iosUrl ?? link.androidUrl }),
+      { headers: { "content-type": "text/html; charset=UTF-8", "cache-control": "no-store, no-cache, must-revalidate, max-age=0", vary: "User-Agent" } },
+    );
   }
 
   const target = resolveTarget(link, {

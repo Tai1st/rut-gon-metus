@@ -12,6 +12,9 @@ export type PublicLinkData = {
   webUrl: string;
   /** Deeplink Shopee: link Shopee gốc người dùng nhập; /<mã> chuyển 301 thẳng tới đây. */
   sourceUrl?: string;
+  /** Deeplink TikTok: địa chỉ mở thẳng app (snssdk1180://…) và địa chỉ cho iOS (onelink). */
+  androidUrl?: string;
+  iosUrl?: string;
   hasPassword?: boolean;
   lockId?: string;
   /** Link của gói Free đã quá hạn dùng: hiện trang nâng cấp thay vì chuyển hướng. */
@@ -34,6 +37,8 @@ export function safeHttpUrl(u: string): URL | null {
 export function isInterstitial(link: PublicLinkData, cookieValue: string | undefined): boolean {
   // Deeplink Shopee do route /r/<mã> xử lý: chuyển 301 sang link Shopee gốc (Shopee tự lo phần mở app).
   if (link.kind === "shopee") return true;
+  // Deeplink TikTok (sản phẩm, chiến dịch) cũng do /r/<mã> phục vụ bằng HTML thuần, chọn bản theo User-Agent ở máy chủ.
+  if (link.kind === "product" || link.kind === "campaign") return !link.hasPassword || isUnlocked(link.code, link.lockId ?? "", cookieValue);
   if (link.kind !== "url" || link.redirectType === "direct") return false;
   return !link.hasPassword || isUnlocked(link.code, link.lockId ?? "", cookieValue);
 }
@@ -181,4 +186,38 @@ export function shopeeRedirectTarget(link: Pick<PublicLinkData, "sourceUrl" | "w
   const u = safeHttpUrl(link.sourceUrl || link.webUrl);
   if (!u || u.protocol !== "https:") return null;
   return /(^|\.)(shopee\.vn|shp\.ee)$/i.test(u.hostname) ? u.toString() : null;
+}
+
+/** Chuỗi nhúng trong <script>: giống JSON nhưng ký tự & viết thành \u0026 và chặn "</script>". */
+const jsAmp = (v: string) => js(v).replace(/&/g, "\u0026");
+
+export type DeeplinkVariant = "bot" | "mobile" | "desktop";
+
+/**
+ * Trang deeplink TikTok bằng HTML thuần, chọn một trong ba bản theo User-Agent (cách các dịch vụ rút gọn TikTok khác làm):
+ * - bot: thẻ og:* và al:* (App Links) để Facebook mở thẳng app TikTok, không có JavaScript;
+ * - mobile: thẻ og:* và một dòng JS gọi thẳng app (snssdk1180://);
+ * - desktop (và bot khác): thẻ og:* và một dòng JS chuyển sang trang web TikTok Shop.
+ */
+export function renderDeeplinkPage(
+  variant: DeeplinkVariant,
+  p: { title: string; image: string; webUrl: string; androidUrl: string; iosUrl: string },
+): string {
+  const t = esc(p.title);
+  const image = p.image ? `<meta property="og:image" content="${esc(p.image)}">` : "";
+  const open = '<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">';
+  if (variant === "bot") {
+    return (
+      open +
+      `<title>${t}</title><meta property="og:type" content="product"><meta property="og:site_name" content="TikTok Shop"><meta property="og:title" content="${t}"><meta property="og:url" content="${esc(p.webUrl)}">${image}` +
+      `<meta property="al:web:url" content="${esc(p.webUrl)}"><meta property="al:android:url" content="${esc(p.androidUrl)}"><meta property="al:android:package" content="com.ss.android.ugc.trill"><meta property="al:android:app_name" content="TikTok">` +
+      `<meta property="al:ios:url" content="${esc(p.iosUrl)}"><meta property="al:ios:app_store_id" content="1235601864"><meta property="al:ios:app_name" content="TikTok"><meta property="al:web:should_fallback" content="true"></head><body></body></html>`
+    );
+  }
+  const go = variant === "mobile" ? p.androidUrl : p.webUrl;
+  return (
+    open +
+    `<meta property="og:type" content="product"><meta property="og:site_name" content="TikTok Shop"><title>${t}</title><meta property="og:title" content="${t}">${image}</head>` +
+    `<body><script>window.location.replace(${jsAmp(go)});</script></body></html>`
+  );
 }
