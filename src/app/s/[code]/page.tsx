@@ -2,7 +2,7 @@ import { cache } from "react";
 import { cookies, headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
-import { beFetch } from "@/lib/be";
+import { beFetch, clickMeta } from "@/lib/be";
 import { INTERNAL_KEY } from "@/lib/config";
 import { isFacebookCrawler } from "@/lib/crawler";
 import { pickTarget, withParams, type RedirectRules } from "@/lib/redirect";
@@ -106,7 +106,8 @@ export default async function Page({ params, searchParams }: Props) {
   const link = await loadLink(code, host);
   if (!link) notFound();
 
-  const ua = (await headers()).get("user-agent") ?? "";
+  const hs = await headers();
+  const ua = hs.get("user-agent") ?? "";
   const countUrl = `/internal/links/${encodeURIComponent(code)}?count=1&host=${encodeURIComponent(host)}`;
 
   if (link.kind === "url") {
@@ -144,10 +145,10 @@ export default async function Page({ params, searchParams }: Props) {
     if (!target) notFound();
     if (link.redirectType === "direct") {
       // Trực tiếp: chuyển hướng HTTP 307 ngay. Đếm xong rồi mới chuyển vì sau redirect() không chạy tiếp được.
-      if (!BOT_UA.test(ua)) await beFetch(countUrl, { internalKey: INTERNAL_KEY }).catch(() => null);
+      if (!BOT_UA.test(ua)) await beFetch(countUrl, { internalKey: INTERNAL_KEY, meta: clickMeta(hs) }).catch(() => null);
       redirect(target.href);
     }
-    if (!BOT_UA.test(ua)) void beFetch(countUrl, { internalKey: INTERNAL_KEY }).catch(() => null);
+    if (!BOT_UA.test(ua)) void beFetch(countUrl, { internalKey: INTERNAL_KEY, meta: clickMeta(hs) }).catch(() => null);
     const jj = (v: string) => JSON.stringify(v).replace(/</g, "\\u003c");
     return (
       // Trang trung gian theo mẫu: nền #f8f8f8, chỉ có vòng xoay "Redirecting", tự chuyển sau 0,5 giây.
@@ -165,7 +166,7 @@ export default async function Page({ params, searchParams }: Props) {
 
   if (!BOT_UA.test(ua)) {
     // Deeplink: đếm lượt bấm, không chờ kết quả để không làm chậm việc chuyển trang.
-    void beFetch(countUrl, { internalKey: INTERNAL_KEY }).catch(() => null);
+    void beFetch(countUrl, { internalKey: INTERNAL_KEY, meta: clickMeta(hs) }).catch(() => null);
   }
 
   const j = (v: string) => JSON.stringify(v).replace(/</g, "\\u003c");

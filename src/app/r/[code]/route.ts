@@ -1,5 +1,5 @@
 import { cookies, headers } from "next/headers";
-import { beFetch } from "@/lib/be";
+import { beFetch, clickMeta } from "@/lib/be";
 import { INTERNAL_KEY } from "@/lib/config";
 import { isAlBot, isFacebookCrawler, isFacebookTraffic, isMobileUa } from "@/lib/crawler";
 import { expiredResponse } from "@/lib/expired";
@@ -37,7 +37,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ code: string }
     const to = isFacebookTraffic(ua) ? real : (shopeeFakeTarget(link, INTERNAL_KEY) ?? real);
     if (!to) return notFound();
     if (!BOT_UA.test(ua)) {
-      void beFetch(`/internal/links/${encodeURIComponent(code)}?count=1&host=${encodeURIComponent(host)}`, { internalKey: INTERNAL_KEY }).catch(() => null);
+      void beFetch(`/internal/links/${encodeURIComponent(code)}?count=1&host=${encodeURIComponent(host)}`, { internalKey: INTERNAL_KEY, meta: clickMeta(h) }).catch(() => null);
     }
     return new Response(null, { status: 301, headers: { location: to, "cache-control": "no-store, no-cache, must-revalidate" } });
   }
@@ -46,7 +46,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ code: string }
   if (link.kind === "product" || link.kind === "campaign") {
     if (!safeHttpUrl(link.webUrl) || !link.androidUrl) return notFound();
     if (!BOT_UA.test(ua)) {
-      void beFetch(`/internal/links/${encodeURIComponent(code)}?count=1&host=${encodeURIComponent(host)}`, { internalKey: INTERNAL_KEY }).catch(() => null);
+      void beFetch(`/internal/links/${encodeURIComponent(code)}?count=1&host=${encodeURIComponent(host)}`, { internalKey: INTERNAL_KEY, meta: clickMeta(h) }).catch(() => null);
     }
     const variant = isAlBot(ua) ? "bot" : isMobileUa(ua) ? "mobile" : "desktop";
     return new Response(
@@ -65,7 +65,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ code: string }
 
   // Bot quét link (Facebook…) không tính lượt bấm.
   if (!BOT_UA.test(ua)) {
-    void beFetch(`/internal/links/${encodeURIComponent(code)}?count=1&host=${encodeURIComponent(host)}`, { internalKey: INTERNAL_KEY }).catch(() => null);
+    void beFetch(`/internal/links/${encodeURIComponent(code)}?count=1&host=${encodeURIComponent(host)}`, { internalKey: INTERNAL_KEY, meta: clickMeta(h) }).catch(() => null);
   }
 
   const html = renderInterstitial({
