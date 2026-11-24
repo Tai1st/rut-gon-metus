@@ -1,7 +1,7 @@
 import { cookies, headers } from "next/headers";
 import { beFetch } from "@/lib/be";
 import { INTERNAL_KEY } from "@/lib/config";
-import { isAlBot, isFacebookCrawler, isFromFacebook, isMobileUa } from "@/lib/crawler";
+import { isAlBot, isFacebookCrawler, isFacebookApp, isMobileUa } from "@/lib/crawler";
 import { expiredResponse } from "@/lib/expired";
 import { isInterstitial, renderDeeplinkPage, renderInterstitial, resolveTarget, safeHttpUrl, shopeeCleanTarget, shopeeRedirectTarget, unlockCookieName, type PublicLinkData } from "@/lib/interstitial";
 
@@ -31,9 +31,10 @@ export async function GET(_req: Request, ctx: { params: Promise<{ code: string }
   // Deeplink Shopee: chuyển 301 thẳng sang link Shopee gốc cho mọi User-Agent (giống cách các dịch vụ rút gọn Shopee khác);
   // Shopee tự lo phần mở app. Chỉ đếm lượt bấm, bot quét link không được tính.
   if (link.kind === "shopee") {
-    // Chỉ lượt đến từ Facebook (bot, trình duyệt trong app, nhận biết bằng User-Agent) nhận link affiliate gốc; còn lại nhận địa chỉ sản phẩm sạch, không có ID hoa hồng.
+    // Chỉ người mở trong ứng dụng Facebook/Messenger (nhận biết bằng User-Agent) nhận link affiliate gốc để mở đúng app và ghi hoa hồng.
+    // Bot quét link (Sharing Debugger) và mọi nguồn khác nhận địa chỉ sản phẩm sạch, không có ID hoa hồng.
     const full = shopeeRedirectTarget(link);
-    const to = isFromFacebook(ua) ? full : (shopeeCleanTarget(link) ?? full);
+    const to = isFacebookApp(ua) ? full : (shopeeCleanTarget(link) ?? full);
     if (!to) return notFound();
     if (!BOT_UA.test(ua)) {
       void beFetch(`/internal/links/${encodeURIComponent(code)}?count=1&host=${encodeURIComponent(host)}`, { internalKey: INTERNAL_KEY }).catch(() => null);
