@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
+import { ArrowUpRight, MessageCircle, Smartphone, Workflow } from "lucide-react";
 import type { ReactNode } from "react";
 import { Ambient, Logo } from "@/components/ui";
 import { PricingBoard } from "@/components/PricingBoard";
+import { SupportButtons } from "@/components/SupportButtons";
 import { beFetch } from "@/lib/be";
 import { SESSION_COOKIE } from "@/lib/config";
 
@@ -122,6 +124,63 @@ const STEPS = [
   { n: "03", title: "Chia sẻ ở bất cứ đâu", text: "Dán link vào bình luận, bài viết hoặc tin nhắn. Người xem trên điện thoại được đưa vào thẳng ứng dụng TikTok." },
 ];
 
+/** Một cột liên kết ở chân trang; liên kết ngoài mở ở tab mới. */
+function FooterCol({ title, links, external }: { title: string; links: [string, string][]; external?: boolean }) {
+  const cls = "text-xs text-slate-400 hover:text-tiktok-cyan transition-colors";
+  return (
+    <div className="space-y-3">
+      <h4 className="text-xs font-extrabold uppercase tracking-widest text-slate-300">{title}</h4>
+      <ul className="space-y-2">
+        {links.map(([href, label]) => (
+          <li key={href}>
+            {external ? (
+              <a href={href} target="_blank" rel="noopener noreferrer" className={cls}>
+                {label}
+              </a>
+            ) : href.startsWith("/") ? (
+              <Link href={href} className={cls}>
+                {label}
+              </Link>
+            ) : (
+              <a href={href} className={cls}>
+                {label}
+              </a>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/** Các web khác trong hệ sinh thái Metus (mở ở tab mới). */
+const ECOSYSTEM: { title: string; text: string; href: string; host: string; tone: "pink" | "cyan"; icon: ReactNode }[] = [
+  {
+    title: "Metus",
+    text: "Bộ công cụ tự động hoá Facebook cho người bán hàng và làm marketing.",
+    href: "https://metus.vn",
+    host: "metus.vn",
+    tone: "cyan",
+    icon: <Workflow className="w-7 h-7" />,
+  },
+  {
+    title: "Metus Zalo",
+    text: "Quản lý nhiều tài khoản Zalo và gửi tin nhắn hàng loạt từ một nơi.",
+    href: "https://zalo.metus.vn",
+    host: "zalo.metus.vn",
+    tone: "pink",
+    icon: <MessageCircle className="w-7 h-7" />,
+  },
+  {
+    title: "Metus AppStore",
+    text: "Chứng chỉ và ứng dụng mở rộng trải nghiệm iPhone.",
+    href: "https://appstore.metus.vn",
+    host: "appstore.metus.vn",
+    tone: "cyan",
+    icon: <Smartphone className="w-7 h-7" />,
+  },
+];
+
 const FAQ = [
   {
     q: "Link có mở thẳng ứng dụng TikTok không?",
@@ -152,6 +211,7 @@ export default async function Home() {
   return (
     <div className="flex-1 flex flex-col tech-grid-bg">
       <Ambient />
+      <SupportButtons />
 
       {/* Thanh điều hướng */}
       <header className="sticky top-0 z-40 bg-tiktok-surface/90 backdrop-blur-md border-b border-tiktok-border">
@@ -165,6 +225,7 @@ export default async function Home() {
               ["#cach-hoat-dong", "Cách hoạt động"],
               ["#tinh-nang", "Tính năng"],
               ...(plans.length > 0 ? [["#bang-gia", "Bảng giá"]] : []),
+              ["#he-sinh-thai", "Hệ sinh thái"],
               ["#hoi-dap", "Hỏi đáp"],
             ].map(([href, label]) => (
               <a key={href} href={href} className="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition-colors">
@@ -319,6 +380,44 @@ export default async function Home() {
           </section>
         )}
 
+        {/* Hệ sinh thái Metus */}
+        <section id="he-sinh-thai" className="space-y-8 scroll-mt-24">
+          <div className="text-center max-w-2xl mx-auto space-y-2">
+            <span className="text-xs font-extrabold uppercase tracking-widest text-tiktok-pink">Hệ sinh thái Metus</span>
+            <h2 className="text-2xl sm:text-4xl font-black">
+              Thêm công cụ từ <span className="text-tiktok-cyan">Metus</span>
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-400">Tài khoản và dịch vụ cùng một hệ sinh thái, dùng riêng hoặc kết hợp tùy nhu cầu.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-6xl mx-auto w-full">
+            {ECOSYSTEM.map((e) => (
+              <a
+                key={e.href}
+                href={e.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`group flex items-center gap-4 bg-tiktok-surface border border-tiktok-border rounded-3xl p-5 transition-colors ${
+                  e.tone === "pink" ? "hover:border-tiktok-pink" : "hover:border-tiktok-cyan"
+                }`}
+              >
+                <div
+                  className={`w-14 h-14 shrink-0 rounded-2xl flex items-center justify-center ${
+                    e.tone === "pink" ? "bg-tiktok-pink/15 text-tiktok-pink" : "bg-tiktok-cyan/15 text-tiktok-cyan"
+                  }`}
+                >
+                  {e.icon}
+                </div>
+                <div className="min-w-0 flex-1 space-y-1">
+                  <h3 className="text-base font-extrabold">{e.title}</h3>
+                  <p className="text-xs text-slate-400 leading-relaxed">{e.text}</p>
+                  <span className="block text-[11px] font-mono text-slate-500 truncate">{e.host}</span>
+                </div>
+                <ArrowUpRight className="w-5 h-5 shrink-0 text-slate-500 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-white" />
+              </a>
+            ))}
+          </div>
+        </section>
+
         {/* Hỏi đáp */}
         <section id="hoi-dap" className="max-w-3xl mx-auto w-full space-y-8 scroll-mt-24">
           <div className="text-center space-y-2">
@@ -356,10 +455,50 @@ export default async function Home() {
         </section>
       </main>
 
-      <footer className="border-t border-tiktok-border/60 bg-black/40 py-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
-          <span>© {new Date().getFullYear()} Metus Link</span>
-          <span>Công cụ không liên kết với TikTok. TikTok là thương hiệu của chủ sở hữu tương ứng.</span>
+      <footer className="border-t border-tiktok-border/60 bg-black/40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="space-y-3 sm:col-span-2 lg:col-span-1">
+            <Link href="/" className="inline-block">
+              <Logo />
+            </Link>
+            <p className="text-xs text-slate-400 leading-relaxed max-w-xs">
+              Rút gọn link thường và deeplink TikTok Shop: mở thẳng app, dùng tên miền riêng, quản lý số liệu trong một nơi.
+            </p>
+          </div>
+
+          <FooterCol
+            title="Sản phẩm"
+            links={[
+              ["#cach-hoat-dong", "Cách hoạt động"],
+              ["#tinh-nang", "Tính năng"],
+              ...(plans.length > 0 ? [["#bang-gia", "Bảng giá"] as [string, string]] : []),
+              ["#hoi-dap", "Hỏi đáp"],
+            ]}
+          />
+
+          <FooterCol
+            title="Tài khoản"
+            links={
+              loggedIn
+                ? [["/dashboard", "Trang quản lý"]]
+                : [
+                    ["/register", "Đăng ký miễn phí"],
+                    ["/login", "Đăng nhập"],
+                  ]
+            }
+          />
+
+          <FooterCol
+            title="Hệ sinh thái Metus"
+            external
+            links={ECOSYSTEM.map((e) => [e.href, e.title] as [string, string])}
+          />
+        </div>
+
+        <div className="border-t border-tiktok-border/60">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 text-[11px] text-slate-500 text-center sm:text-left">
+            © {new Date().getFullYear()} Metus Link. Bảo lưu mọi quyền.
+          </div>
         </div>
       </footer>
     </div>
