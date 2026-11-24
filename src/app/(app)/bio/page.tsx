@@ -46,6 +46,7 @@ export default function BioPage() {
   const [bio, setBio] = useState<Saved>(SAMPLE);
   const [canPublish, setCanPublish] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [upBusy, setUpBusy] = useState("");
   const [error, setError] = useState("");
@@ -61,7 +62,9 @@ export default function BioPage() {
         setLoaded(true);
       })
       .catch((e) => {
+        // Không tải được thì không biết gói của người dùng: báo lỗi chứ không được kết luận là gói Free.
         setError(e instanceof Error ? e.message : "Không tải được trang Bio");
+        setLoadFailed(true);
         setLoaded(true);
       });
   }, []);
@@ -260,7 +263,7 @@ export default function BioPage() {
           <ErrorBox message={error} />
           {ok && <p className="text-xs text-emerald-400">{ok}</p>}
 
-          {!canPublish && (
+          {!loadFailed && !canPublish && (
             <p className="text-xs text-amber-400">
               Gói Miễn phí chỉ lưu được bản nháp. Để xuất bản trang Bio công khai, hãy{" "}
               <Link href="/plans" className="underline font-semibold">
@@ -271,10 +274,10 @@ export default function BioPage() {
           )}
 
           <div className="flex flex-wrap gap-3 pt-2">
-            <button type="button" onClick={() => void save(true)} disabled={busy || !canPublish || !bio.slug.trim()} className={`${btnPrimary} flex-1`}>
+            <button type="button" onClick={() => void save(true)} disabled={busy || loadFailed || !canPublish || !bio.slug.trim()} className={`${btnPrimary} flex-1`}>
               {busy ? "Đang lưu…" : "Lưu & Xuất bản Bio"}
             </button>
-            <button type="button" onClick={() => void save(false)} disabled={busy || !bio.slug.trim()} className={btnGhost}>
+            <button type="button" onClick={() => void save(false)} disabled={busy || loadFailed || !bio.slug.trim()} className={btnGhost}>
               Lưu nháp
             </button>
             {bio.published && publicUrl && (
