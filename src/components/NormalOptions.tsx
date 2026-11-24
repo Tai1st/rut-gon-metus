@@ -1,5 +1,6 @@
 "use client";
 
+import { imgSrc } from "@/lib/img";
 import { useRef, useState } from "react";
 import { ChevronDown, Globe, Hash, ImagePlus, Languages, Lock, MapPin, Plus, Settings2, Smartphone, Tag, Trash2 } from "lucide-react";
 import { api } from "@/lib/api";
@@ -268,7 +269,7 @@ export function NormalOptions({
                   <div className="w-36 h-24 rounded-lg border border-dashed border-zinc-700 bg-black/40 flex items-center justify-center text-[11px] text-zinc-500 overflow-hidden shrink-0">
                     {shownImage ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={shownImage} alt="Xem trước banner" className="w-full h-full object-cover" />
+                      <img src={imgSrc(shownImage)} alt="Xem trước banner" className="w-full h-full object-cover" />
                     ) : (
                       "No image"
                     )}
@@ -282,19 +283,22 @@ export function NormalOptions({
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold disabled:opacity-50"
                     >
                       <ImagePlus className="w-4 h-4" />
-                      {uploading ? "Đang tải…" : "Tải banner"}
+                      {uploading ? "Đang tải…" : value.image || preview ? "Đổi banner" : "Tải banner"}
                     </button>
                     <p className="text-[11px] text-zinc-500">Banner phải là PNG hoặc JPEG (tối đa 500KB).</p>
-                    <input
-                      className={inputCls}
-                      value={value.image}
-                      disabled={disabled || direct}
-                      onChange={(e) => {
-                        setPreview("");
-                        set("image", e.target.value);
-                      }}
-                      placeholder="hoặc dán đường dẫn ảnh https://…"
-                    />
+                    {(value.image || preview) && (
+                      <button
+                        type="button"
+                        disabled={disabled || direct}
+                        onClick={() => {
+                          setPreview("");
+                          set("image", "");
+                        }}
+                        className="text-[11px] text-red-400 hover:underline disabled:opacity-50"
+                      >
+                        Xóa banner
+                      </button>
+                    )}
                     <ErrorBox message={upError} />
                   </div>
                 </div>

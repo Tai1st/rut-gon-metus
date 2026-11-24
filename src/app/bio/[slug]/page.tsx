@@ -4,7 +4,8 @@ import { cache } from "react";
 import { headers } from "next/headers";
 import { BioView, type BioData } from "@/components/BioView";
 import { beFetch } from "@/lib/be";
-import { INTERNAL_KEY } from "@/lib/config";
+import { INTERNAL_KEY, WEB_HOSTS } from "@/lib/config";
+import { imgSrc } from "@/lib/img";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,12 @@ async function isHuman() {
   return !BOT_UA.test((await headers()).get("user-agent") ?? "");
 }
 
+/** Địa chỉ ảnh tuyệt đối cho thẻ og:image, ưu tiên tên miền của trang để không lộ địa chỉ backend. */
+function ogImage(u: string): string {
+  const p = imgSrc(u);
+  return p.startsWith("/") ? `https://${[...WEB_HOSTS][0] ?? "link.metus.vn"}${p}` : p;
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const bio = await loadBio(slug, await isHuman());
@@ -34,7 +41,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: { absolute: bio.handle ? `${bio.name} (${bio.handle})` : bio.name },
     description: desc,
-    openGraph: { title: bio.name, description: desc, images: bio.avatar ? [bio.avatar] : undefined },
+    openGraph: { title: bio.name, description: desc, images: bio.avatar ? [ogImage(bio.avatar)] : undefined },
   };
 }
 

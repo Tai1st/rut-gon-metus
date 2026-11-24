@@ -7,7 +7,7 @@ import { SESSION_COOKIE } from "@/lib/config";
  * Proxy từ trình duyệt tới backend: gắn JWT lấy từ cookie httpOnly (trình duyệt không bao giờ thấy token)
  * và chỉ cho đi tới các nhóm route của tính năng này.
  */
-const ALLOWED = ["links", "link-plans", "link-orders", "link-domains"];
+const ALLOWED = ["links", "link-plans", "link-orders", "link-domains", "link-bios"];
 const ALLOWED_AUTH = new Set(["me", "change-password"]);
 
 type Ctx = { params: Promise<{ path: string[] }> };

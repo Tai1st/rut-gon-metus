@@ -2,6 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element */
 import { useEffect, useState, type ReactNode } from "react";
+import { imgSrc } from "@/lib/img";
 
 export type BioTemplate = "neon" | "glass" | "sunset";
 export type BioData = {
@@ -29,7 +30,7 @@ const safe = (u: string) => (/^https?:\/\//i.test(u) ? u : "#");
 function Img({ src, alt, className, fallback }: { src: string; alt: string; className: string; fallback: string }) {
   const [bad, setBad] = useState(false);
   useEffect(() => setBad(false), [src]);
-  return <img src={bad || !src ? fallback : src} alt={alt} className={className} loading="lazy" referrerPolicy="no-referrer" onError={() => setBad(true)} />;
+  return <img src={bad || !src ? fallback : imgSrc(src)} alt={alt} className={className} loading="lazy" referrerPolicy="no-referrer" onError={() => setBad(true)} />;
 }
 
 /** Ảnh đại diện: lỗi hoặc để trống thì hiện chữ cái đầu của tên. */
@@ -37,7 +38,7 @@ function Avatar({ src, initial, shape }: { src: string; initial: string; shape: 
   const [bad, setBad] = useState(false);
   useEffect(() => setBad(false), [src]);
   if (!src || bad) return <>{initial}</>;
-  return <img src={src} alt="" referrerPolicy="no-referrer" onError={() => setBad(true)} className={`w-full h-full object-cover ${shape}`} />;
+  return <img src={imgSrc(src)} alt="" referrerPolicy="no-referrer" onError={() => setBad(true)} className={`w-full h-full object-cover ${shape}`} />;
 }
 
 type Style = {

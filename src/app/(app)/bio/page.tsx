@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ImagePlus } from "lucide-react";
 import { api, copyText } from "@/lib/api";
+import { imgSrc } from "@/lib/img";
 import { BIO_TEMPLATES, BioView, type BioData, type BioTemplate } from "@/components/BioView";
 import { btnGhost, btnPrimary, ErrorBox, inputCls, Label } from "@/components/ui";
 
@@ -172,7 +173,7 @@ export default function BioPage() {
             <Label>Ảnh avatar trang Bio</Label>
             <div className="flex items-center gap-3">
               <div className="w-16 h-16 rounded-full bg-zinc-900 border border-zinc-700 overflow-hidden flex items-center justify-center text-sm font-extrabold text-tiktok-cyan shrink-0">
-                {bio.avatar ? <img src={bio.avatar} alt="" referrerPolicy="no-referrer" className="w-full h-full object-cover" /> : (bio.name || "B").trim().slice(0, 2).toUpperCase()}
+                {bio.avatar ? <img src={imgSrc(bio.avatar)} alt="" referrerPolicy="no-referrer" className="w-full h-full object-cover" /> : (bio.name || "B").trim().slice(0, 2).toUpperCase()}
               </div>
               <div className="flex flex-wrap gap-2">
                 <button type="button" onClick={() => avatarInput.current?.click()} disabled={upBusy === "avatar"} className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-tiktok-cyan/15 text-tiktok-cyan border border-tiktok-cyan/30 hover:bg-tiktok-cyan/25 text-xs font-bold shrink-0 disabled:opacity-50">
@@ -239,7 +240,7 @@ export default function BioPage() {
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-14 h-14 rounded-lg bg-zinc-800 border border-zinc-700 overflow-hidden flex items-center justify-center text-[10px] text-zinc-500 shrink-0">
-                    {p.image ? <img src={p.image} alt="" referrerPolicy="no-referrer" className="w-full h-full object-cover" /> : "Chưa có ảnh"}
+                    {p.image ? <img src={imgSrc(p.image)} alt="" referrerPolicy="no-referrer" className="w-full h-full object-cover" /> : "Chưa có ảnh"}
                   </div>
                   <label className="cursor-pointer text-center py-1.5 px-3 rounded-lg bg-zinc-800 hover:bg-tiktok-cyan/20 text-[11px] font-semibold">
                     {upBusy === `p${i}` ? "Đang tải…" : p.image ? "Đổi ảnh" : "Chọn ảnh"}
