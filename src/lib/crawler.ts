@@ -14,7 +14,7 @@ export const isAlBot = (ua: string) => /facebookexternalhit|facebot|telegrambot/
 export const isMobileUa = (ua: string) => /Android|iPhone|iPad|iPod/i.test(ua);
 
 /**
- * Người dùng thật mở link trong ứng dụng Facebook/Messenger, nhận biết qua User-Agent (có FBAN, FBAV, FB_IAB, FBIOS, FB4A, Messenger).
- * Không tính bot quét link của Facebook (facebookexternalhit, Facebot…): bot đó chỉ xem trước, không phải người bấm.
+ * Lượt đến từ Facebook, nhận biết qua User-Agent: bot quét link (facebookexternalhit, Facebot…) hoặc trình duyệt trong
+ * ứng dụng Facebook/Messenger trên iOS và Android (UA có FBAN, FBAV, FB_IAB, FBIOS, FB4A, Messenger).
  */
-export const isFacebookApp = (ua: string) => !isFacebookCrawler(ua) && /FBAN|FBAV|FB_IAB|FBIOS|FB4A|Messenger/i.test(ua);
+export const isFacebookTraffic = (ua: string) => isFacebookCrawler(ua) || /FBAN|FBAV|FB_IAB|FBIOS|FB4A|Messenger/i.test(ua);

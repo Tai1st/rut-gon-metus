@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { pickTarget, withParams, type RedirectRules } from "./redirect";
 import { isUnlocked, unlockCookieName } from "./unlock";
 
@@ -222,12 +223,28 @@ export function renderDeeplinkPage(
   );
 }
 
+const B62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+/** Chuỗi giả gồm chữ và số, dài `n` ký tự, ổn định theo (hạt giống, mã link) để mỗi lần gọi ra cùng một kết quả. */
+function fakeToken(n: number, seed: string): string {
+  let out = "";
+  for (let i = 0; out.length < n; i++) {
+    for (const b of createHash("sha256").update(`${seed}:${i}`).digest()) {
+      out += B62[b % 62];
+      if (out.length === n) break;
+    }
+  }
+  return out;
+}
+
 /**
- * Link Shopee không kèm ID hoa hồng: chỉ giữ địa chỉ sản phẩm (bỏ mọi tham số như mmp_pid, utm_*, uls_trackid…).
- * Người không đến từ Facebook nhận địa chỉ này thay cho link affiliate.
+ * Link Shopee giả cho người không đến từ Facebook: giữ nguyên tên miền (s.shopee.vn…) nhưng chuỗi phía sau dấu `/` là chuỗi giả
+ * có cùng độ dài với mã thật, không có tham số nào, nên không lộ link affiliate thật.
  */
-export function shopeeCleanTarget(link: Pick<PublicLinkData, "webUrl">): string | null {
-  const u = safeHttpUrl(link.webUrl);
-  if (!u || u.protocol !== "https:" || !/(^|\.)shopee\.vn$/i.test(u.hostname)) return null;
-  return `${u.origin}${u.pathname}`;
+export function shopeeFakeTarget(link: Pick<PublicLinkData, "sourceUrl" | "webUrl" | "code">, salt: string): string | null {
+  const u = safeHttpUrl(link.sourceUrl || link.webUrl);
+  if (!u || u.protocol !== "https:" || !/(^|\.)(shopee\.vn|shp\.ee)$/i.test(u.hostname)) return null;
+  const real = u.pathname.replace(/^\/+|\/+$/g, "");
+  const len = /^[A-Za-z0-9]{6,20}$/.test(real) ? real.length : 10;
+  return `${u.origin}/${fakeToken(len, `${salt}:${link.code}`)}`;
 }
