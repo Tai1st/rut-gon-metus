@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint-disable @next/next/no-img-element */
+
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ImagePlus } from "lucide-react";
@@ -64,9 +66,11 @@ export default function BioPage() {
   }, []);
 
   const set = <K extends keyof Saved>(k: K, v: Saved[K]) => setBio((b) => ({ ...b, [k]: v }));
-  const setBtn = (i: number, k: "title" | "url", v: string) => set("buttons", bio.buttons.map((b, j) => (j === i ? { ...b, [k]: v } : b)));
+  // Dùng dạng hàm theo trạng thái mới nhất: tải ảnh lên xong (bất đồng bộ) không được ghi đè phần người dùng vừa gõ trong lúc chờ.
+  const setBtn = (i: number, k: "title" | "url", v: string) =>
+    setBio((b) => ({ ...b, buttons: b.buttons.map((x, j) => (j === i ? { ...x, [k]: v } : x)) }));
   const setProd = (i: number, k: "title" | "price" | "image" | "url", v: string) =>
-    set("products", bio.products.map((p, j) => (j === i ? { ...p, [k]: v } : p)));
+    setBio((b) => ({ ...b, products: b.products.map((x, j) => (j === i ? { ...x, [k]: v } : x)) }));
 
   async function pickImage(file: File | undefined, apply: (url: string) => void, id: string) {
     if (!file) return;
@@ -166,19 +170,24 @@ export default function BioPage() {
 
           <div className="space-y-1.5">
             <Label>Ảnh avatar trang Bio</Label>
-            <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
-              <input className={`${inputCls} flex-1 font-mono text-xs`} value={bio.avatar} onChange={(e) => set("avatar", e.target.value.trim())} placeholder="Dán link ảnh (https://…) hoặc tải ảnh lên" />
-              <div className="flex gap-2">
+            <div className="flex items-center gap-3">
+              <div className="w-16 h-16 rounded-full bg-zinc-900 border border-zinc-700 overflow-hidden flex items-center justify-center text-sm font-extrabold text-tiktok-cyan shrink-0">
+                {bio.avatar ? <img src={bio.avatar} alt="" referrerPolicy="no-referrer" className="w-full h-full object-cover" /> : (bio.name || "B").trim().slice(0, 2).toUpperCase()}
+              </div>
+              <div className="flex flex-wrap gap-2">
                 <button type="button" onClick={() => avatarInput.current?.click()} disabled={upBusy === "avatar"} className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-tiktok-cyan/15 text-tiktok-cyan border border-tiktok-cyan/30 hover:bg-tiktok-cyan/25 text-xs font-bold shrink-0 disabled:opacity-50">
                   <ImagePlus className="w-3.5 h-3.5" />
-                  {upBusy === "avatar" ? "Đang tải…" : "Tải ảnh lên"}
+                  {upBusy === "avatar" ? "Đang tải…" : bio.avatar ? "Đổi ảnh" : "Tải ảnh lên"}
                 </button>
-                <button type="button" onClick={() => set("avatar", "")} className="px-3 py-2 rounded-xl bg-zinc-800 text-xs font-semibold hover:text-red-400 shrink-0">
-                  Mặc định
-                </button>
+                {bio.avatar && (
+                  <button type="button" onClick={() => set("avatar", "")} className="px-3 py-2 rounded-xl bg-zinc-800 text-xs font-semibold hover:text-red-400 shrink-0">
+                    Xóa ảnh
+                  </button>
+                )}
                 <input ref={avatarInput} type="file" accept="image/png,image/jpeg" className="hidden" onChange={(e) => { void pickImage(e.target.files?.[0], (u) => set("avatar", u), "avatar"); e.target.value = ""; }} />
               </div>
             </div>
+            <p className="text-[11px] text-zinc-500">Ảnh PNG hoặc JPEG, tối đa 500KB.</p>
           </div>
 
           <div>
@@ -228,12 +237,19 @@ export default function BioPage() {
                   <input className={`${inputCls} sm:col-span-8 py-1.5 text-xs`} maxLength={120} value={p.title} onChange={(e) => setProd(i, "title", e.target.value)} placeholder="Tiêu đề sản phẩm…" />
                   <input className={`${inputCls} sm:col-span-4 py-1.5 text-xs font-mono`} maxLength={30} value={p.price} onChange={(e) => setProd(i, "price", e.target.value)} placeholder="Giá (vd: 149k)" />
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
-                  <input className={`${inputCls} sm:col-span-9 py-1.5 text-xs font-mono`} value={p.image} onChange={(e) => setProd(i, "image", e.target.value.trim())} placeholder="Link ảnh sản phẩm (https://…)" />
-                  <label className="sm:col-span-3 cursor-pointer text-center py-1.5 px-2 rounded-lg bg-zinc-800 hover:bg-tiktok-cyan/20 text-[11px] font-semibold truncate">
-                    {upBusy === `p${i}` ? "Đang tải…" : "Chọn ảnh"}
+                <div className="flex items-center gap-3">
+                  <div className="w-14 h-14 rounded-lg bg-zinc-800 border border-zinc-700 overflow-hidden flex items-center justify-center text-[10px] text-zinc-500 shrink-0">
+                    {p.image ? <img src={p.image} alt="" referrerPolicy="no-referrer" className="w-full h-full object-cover" /> : "Chưa có ảnh"}
+                  </div>
+                  <label className="cursor-pointer text-center py-1.5 px-3 rounded-lg bg-zinc-800 hover:bg-tiktok-cyan/20 text-[11px] font-semibold">
+                    {upBusy === `p${i}` ? "Đang tải…" : p.image ? "Đổi ảnh" : "Chọn ảnh"}
                     <input type="file" accept="image/png,image/jpeg" className="hidden" onChange={(e) => { void pickImage(e.target.files?.[0], (u) => setProd(i, "image", u), `p${i}`); e.target.value = ""; }} />
                   </label>
+                  {p.image && (
+                    <button type="button" onClick={() => setProd(i, "image", "")} className="text-[11px] text-red-400 hover:underline">
+                      Xóa ảnh
+                    </button>
+                  )}
                 </div>
                 <input className={`${inputCls} py-1.5 text-xs font-mono`} value={p.url} onChange={(e) => setProd(i, "url", e.target.value)} placeholder="Link sản phẩm (https://shopee.vn/… hoặc https://vt.tiktok.com/…)" />
               </div>

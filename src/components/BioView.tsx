@@ -1,5 +1,7 @@
+"use client";
+
 /* eslint-disable @next/next/no-img-element */
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 export type BioTemplate = "neon" | "glass" | "sunset";
 export type BioData = {
@@ -22,6 +24,21 @@ const PLACEHOLDER = "https://placehold.co/120x120/18181D/25F4EE?text=Deal";
 
 /** Chỉ cho phép đường dẫn http(s) (chặn javascript: và các scheme khác) trước khi gắn vào href. */
 const safe = (u: string) => (/^https?:\/\//i.test(u) ? u : "#");
+
+/** Ảnh có dự phòng: tải lỗi thì thay bằng ảnh mặc định để thẻ liên kết vẫn hiện đầy đủ, không để ô trống. */
+function Img({ src, alt, className, fallback }: { src: string; alt: string; className: string; fallback: string }) {
+  const [bad, setBad] = useState(false);
+  useEffect(() => setBad(false), [src]);
+  return <img src={bad || !src ? fallback : src} alt={alt} className={className} loading="lazy" referrerPolicy="no-referrer" onError={() => setBad(true)} />;
+}
+
+/** Ảnh đại diện: lỗi hoặc để trống thì hiện chữ cái đầu của tên. */
+function Avatar({ src, initial, shape }: { src: string; initial: string; shape: string }) {
+  const [bad, setBad] = useState(false);
+  useEffect(() => setBad(false), [src]);
+  if (!src || bad) return <>{initial}</>;
+  return <img src={src} alt="" referrerPolicy="no-referrer" onError={() => setBad(true)} className={`w-full h-full object-cover ${shape}`} />;
+}
 
 type Style = {
   screen: string;
@@ -89,11 +106,7 @@ export function BioView({ bio, footer }: { bio: BioData; footer?: ReactNode }) {
     <div className={`w-full min-h-full ${s.screen} pt-12 pb-6 px-4 flex flex-col items-center text-center`}>
       <div className={`w-16 h-16 p-0.5 mb-2.5 shrink-0 overflow-hidden ${s.ring}`}>
         <div className={`w-full h-full flex items-center justify-center font-extrabold overflow-hidden ${s.inner}`}>
-          {bio.avatar ? (
-            <img src={bio.avatar} alt="" className={`w-full h-full object-cover ${s.avatarShape}`} />
-          ) : (
-            initial
-          )}
+          <Avatar src={bio.avatar} initial={initial} shape={s.avatarShape} />
         </div>
       </div>
       <h1 className="font-bold text-base">{bio.name || "Tên của bạn"}</h1>
@@ -114,7 +127,7 @@ export function BioView({ bio, footer }: { bio: BioData; footer?: ReactNode }) {
           <div className="text-[10px] font-bold uppercase tracking-wider opacity-70 mb-1.5">Sản phẩm nổi bật</div>
           {bio.products.map((p, i) => (
             <a key={i} href={safe(p.url)} target="_blank" rel="noopener noreferrer nofollow" className={`flex items-center gap-2.5 p-2 rounded-xl border transition-all ${s.card}`}>
-              <img src={p.image || PLACEHOLDER} alt={p.title || "Sản phẩm"} className="w-11 h-11 rounded-lg object-cover shrink-0 bg-zinc-800" />
+              <Img src={p.image} fallback={PLACEHOLDER} alt={p.title || "Sản phẩm"} className="w-11 h-11 rounded-lg object-cover shrink-0 bg-zinc-800" />
               <div className="min-w-0 flex-1">
                 <div className="text-[11px] font-bold leading-snug line-clamp-2">{p.title || "Sản phẩm"}</div>
                 {p.price && <div className={`text-[11px] font-mono font-bold mt-0.5 ${s.price}`}>{p.price}</div>}
