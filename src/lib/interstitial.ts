@@ -221,3 +221,13 @@ export function renderDeeplinkPage(
     `<body><script>window.location.replace(${jsAmp(go)});</script></body></html>`
   );
 }
+
+/**
+ * Link Shopee không kèm ID hoa hồng: chỉ giữ địa chỉ sản phẩm (bỏ mọi tham số như mmp_pid, utm_*, uls_trackid…).
+ * Người không đến từ Facebook nhận địa chỉ này thay cho link affiliate.
+ */
+export function shopeeCleanTarget(link: Pick<PublicLinkData, "webUrl">): string | null {
+  const u = safeHttpUrl(link.webUrl);
+  if (!u || u.protocol !== "https:" || !/(^|\.)shopee\.vn$/i.test(u.hostname)) return null;
+  return `${u.origin}${u.pathname}`;
+}

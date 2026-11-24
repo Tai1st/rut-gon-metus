@@ -1,9 +1,9 @@
 import { cookies, headers } from "next/headers";
 import { beFetch } from "@/lib/be";
 import { INTERNAL_KEY } from "@/lib/config";
-import { isAlBot, isFacebookCrawler, isMobileUa } from "@/lib/crawler";
+import { isAlBot, isFacebookCrawler, isFromFacebook, isMobileUa } from "@/lib/crawler";
 import { expiredResponse } from "@/lib/expired";
-import { isInterstitial, renderDeeplinkPage, renderInterstitial, resolveTarget, safeHttpUrl, shopeeRedirectTarget, unlockCookieName, type PublicLinkData } from "@/lib/interstitial";
+import { isInterstitial, renderDeeplinkPage, renderInterstitial, resolveTarget, safeHttpUrl, shopeeCleanTarget, shopeeRedirectTarget, unlockCookieName, type PublicLinkData } from "@/lib/interstitial";
 
 export const dynamic = "force-dynamic";
 
@@ -31,12 +31,14 @@ export async function GET(_req: Request, ctx: { params: Promise<{ code: string }
   // Deeplink Shopee: chuyển 301 thẳng sang link Shopee gốc cho mọi User-Agent (giống cách các dịch vụ rút gọn Shopee khác);
   // Shopee tự lo phần mở app. Chỉ đếm lượt bấm, bot quét link không được tính.
   if (link.kind === "shopee") {
-    const to = shopeeRedirectTarget(link);
+    // Chỉ lượt đến từ Facebook (bot, trình duyệt trong app, Referer) nhận link affiliate gốc; còn lại nhận địa chỉ sản phẩm sạch, không có ID hoa hồng.
+    const full = shopeeRedirectTarget(link);
+    const to = isFromFacebook(ua, h.get("referer")) ? full : (shopeeCleanTarget(link) ?? full);
     if (!to) return notFound();
     if (!BOT_UA.test(ua)) {
       void beFetch(`/internal/links/${encodeURIComponent(code)}?count=1&host=${encodeURIComponent(host)}`, { internalKey: INTERNAL_KEY }).catch(() => null);
     }
-    return new Response(null, { status: 301, headers: { location: to, "cache-control": "no-store, no-cache, must-revalidate" } });
+    return new Response(null, { status: 301, headers: { location: to, "cache-control": "no-store, no-cache, must-revalidate", vary: "User-Agent, Referer" } });
   }
 
   // Deeplink TikTok: HTML thuần, chọn bản theo User-Agent (bot Facebook/Telegram, di động, còn lại). Chỉ đếm lượt bấm của người thật.

@@ -12,3 +12,17 @@ export const isAlBot = (ua: string) => /facebookexternalhit|facebot|telegrambot/
 
 /** Trình duyệt di động (kể cả trình duyệt trong ứng dụng Facebook, Zalo…): gọi thẳng app TikTok. */
 export const isMobileUa = (ua: string) => /Android|iPhone|iPad|iPod/i.test(ua);
+
+/**
+ * Người dùng hoặc bot đến từ Facebook: bot quét link của Facebook, trình duyệt trong ứng dụng Facebook/Messenger
+ * (UA có FBAN, FBAV, FB_IAB, FBIOS) hoặc Referer thuộc facebook.com / messenger.com.
+ */
+export function isFromFacebook(ua: string, referer: string | null | undefined): boolean {
+  if (isFacebookCrawler(ua) || /FBAN|FBAV|FB_IAB|FBIOS|FB4A|Messenger/i.test(ua)) return true;
+  if (!referer) return false;
+  try {
+    return /(^|\.)(facebook\.com|fb\.com|messenger\.com)$/i.test(new URL(referer).hostname);
+  } catch {
+    return false;
+  }
+}
