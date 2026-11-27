@@ -1,10 +1,10 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api, copyText } from "@/lib/api";
 import { shortUrl as shortUrlOf } from "@/lib/short";
-import type { LinkItem } from "@/lib/types";
+import type { Domain, LinkItem } from "@/lib/types";
 import { Badge, btnGhost, Card, ErrorBox, inputCls } from "@/components/ui";
 import { ModeToggle, type ShortenMode } from "@/components/ModeToggle";
 
@@ -35,7 +35,14 @@ export default function BulkPage() {
   const [running, setRunning] = useState(false);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
+  const [domains, setDomains] = useState<{ system: Domain[]; custom: Domain[] }>({ system: [], custom: [] });
   const stop = useRef(false);
+
+  useEffect(() => {
+    api<{ system: Domain[]; custom: Domain[] }>("link-domains/available")
+      .then(setDomains)
+      .catch(() => {});
+  }, []);
 
   const lines = parseLines(text);
   const over = lines.length > MAX_LINES;
@@ -54,7 +61,7 @@ export default function BulkPage() {
       try {
         const l = await api<LinkItem>("links", {
           method: "POST",
-          body: { mode, url: list[i], ...(domain.trim() && { domain: domain.trim() }) },
+          body: { mode, url: list[i], ...(domain && { domain }) },
         });
         patch(i, { status: "ok", short: shortUrlOf(l, window.location.host), title: l.title });
       } catch (e) {
@@ -103,13 +110,25 @@ export default function BulkPage() {
             disabled={running}
           />
           <div className="grid sm:grid-cols-2 gap-3">
-            <input
-              className={inputCls}
+            <select
+              className={`${inputCls} cursor-pointer`}
               value={domain}
               onChange={(e) => setDomain(e.target.value)}
-              placeholder="Tên miền (tuỳ chọn, để trống = mặc định)"
               disabled={running}
-            />
+              aria-label="Tên miền rút gọn"
+            >
+              <option value="">Tên miền mặc định</option>
+              {domains.system.map((d) => (
+                <option key={d.id} value={d.host}>
+                  {d.host}
+                </option>
+              ))}
+              {domains.custom.map((d) => (
+                <option key={d.id} value={d.host}>
+                  {d.host} (của bạn)
+                </option>
+              ))}
+            </select>
             <div className="flex items-center gap-2 text-xs">
               <Badge tone={over ? "red" : "blue"}>
                 {lines.length}/{MAX_LINES} link
